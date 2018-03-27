@@ -1,0 +1,42 @@
+/**
+ * @file     dev_mmeadc01b_user_i2c_read.c
+ * @brief    MME-ADC01-B: read  data from slave device via User I2C bus
+ *
+ * @note
+ *
+ * @date     2017-11-16
+ * @author   ymzk/tokki
+ */
+
+#include <stdio.h>                       /* printf()    */
+#include <stdint.h>                      /* uint32_t    */
+#include <sys/ioctl.h>                   /* ioctl()     */
+#include <sys/time.h>                    /* timeval     */
+
+#include "../mmeadc01b/mmeadc01b_defs.h" /* IOCTL cmd   */
+#include "./dev_api_mmeadc01b.h"         /* own library */
+
+/**
+ * dev_mmeadc01b_user_i2c_read()
+ * @brief    read  data from slave device via User I2C bus
+ *
+ * @param    [in]   buf        char ::= input command  (<op> <arg>[<delim><arg>])
+ * @param    [in]  *delim      char ::= input command delimier
+ * @param    [out] *args[]     char ::= split w/ dilimiter ' '
+ * @return          stat            ::= process status
+ */
+int
+dev_mmeadc01b_user_i2c_read                 (int fd,       i2c_fmt_t *fmt)
+{
+    int     stat = MMEADC01B_ERR_OK;
+
+    /* read access w/ User I2C */
+    stat       = ioctl(fd, MMEADC01B_USER_I2C_READ , fmt);
+    if (stat   < 0) {
+        stat   = MMEADC01B_ERR_INVALID;
+    }
+
+    return  stat;
+}
+
+/* end */
