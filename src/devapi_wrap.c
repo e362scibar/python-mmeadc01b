@@ -100,6 +100,10 @@ static PyObject* mmeadc01b_open(PyObject* self, PyObject* args){
     return NULL;
   }
   fd = open(devname, O_RDWR | O_SYNC);
+  if(fd == -1){
+    PyErr_SetFromErrno(PyExc_OSError);
+    return NULL;
+  }
   return PyLong_FromLong(fd);
 }
 
@@ -109,6 +113,10 @@ static PyObject* mmeadc01b_close(PyObject* self, PyObject* args){
     return NULL;
   }
   status = close(fd);
+  if(fd == -1){
+    PyErr_SetFromErrno(PyExc_OSError);
+    return NULL;
+  }
   return PyLong_FromLong(status);
 }
 
