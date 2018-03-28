@@ -19,5 +19,5 @@ class Register:
                 item = line.strip().split()
                 if len(item) < 2 or item[0][0] == '#':
                     continue
-                cls.data[item[0]] = (int(item[1]), int(item[2]))
+                cls.data[item[0]] = (int(item[1]), int(item[2],0))
 

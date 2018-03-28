@@ -382,7 +382,7 @@ static struct PyModuleDef mmeadc01b_module = {
   mmeadc01b_methods
 };
 
-PyMODINIT_FUNC PyInit_mmeadc01b(void){
+PyMODINIT_FUNC PyInit_devapi(void){
   return PyModule_Create(&mmeadc01b_module);
 }
 
