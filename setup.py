@@ -28,5 +28,6 @@ setup(name="mmeadc01b",
                 url="http://xfel.riken.jp/",
                 packages=["mmeadc01b"],
                 package_dir={"mmeadc01b":"src"},
+                package_data={"codama": ["regdata.txt","errordata.txt"]},
                 ext_modules = [ext_devapi])
 
