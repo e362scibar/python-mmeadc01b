@@ -15,7 +15,8 @@ class Device:
 
     # DevAPI Methods
     def open(self, devfile):
-        fd = devapi.open(devfile)
+        self.fd = devapi.open(devfile)
+        self.clear_dma_buf_status()
         self.mmap_dma_buf()
     def close(self):
         if self.fd is None:
@@ -23,6 +24,7 @@ class Device:
         if self.dmabuf is not None:
             self.munmap_dma_buf()
         devapi.close(self.fd)
+        self.fd = None
     def read(self, reg, num=1):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
@@ -147,7 +149,9 @@ class Device:
         if self.fd is None:
             raise RuntimeError("Device not opened.")
         functype = ctypes.CFUNCTYPE(None, ctypes.c_int)
-        status = devapi.register_interrupt_callback(self.fd, functype(callback))
+        cb = functype(callback)
+        ptr = ctypes.cast(cb, ctypes.c_void_p).value
+        status = devapi.register_interrupt_callback(self.fd, ptr)
         if status:
             raise Error(status)
     def unregister_interrupt_callback(self):
@@ -181,7 +185,7 @@ class Device:
         self.write(Register("INTR_CLR"), 0x3)
         self.write(Register("INTR_CLR"), 0)
         self.write(Register("INTR_MASK"), 0)
-        self.register_interrupt_callback(self.callback)
+        #self.register_interrupt_callback(self.callback)
     def wfm_start(self):
         self.dmadone = False
         self.write(Register("WAVE_START"), 0)
@@ -192,14 +196,15 @@ class Device:
         self.write(Register("WAVE_SOFTTRG"), 1)
         self.write(Register("WAVE_SOFTTRG"), 0)
     def wfm_terminate(self):
-        self.unregister_interrupt_callback()
+        pass
+        #self.unregister_interrupt_callback()
     def wfm_get(self):
-        if self.dmabuf is None:
-            raise RuntimeError("DMA buffer not mmapped.")
-        if not self.dmadone:
-            time.sleep(0.1)
-            if not self.dmadone:
-                raise TimeoutError("Waveform timeout")
+        #if self.dmabuf is None:
+        #    raise RuntimeError("DMA buffer not mmapped.")
+        #if not self.dmadone:
+        #    time.sleep(0.1)
+        #    if not self.dmadone:
+        #        raise TimeoutError("Waveform timeout")
         status, adc, iq = devapi.get_waveform(self.dmabuf)
         return adc, iq
 

@@ -6,7 +6,7 @@
 FPGA_VER                0 0x0000D000   # FPGA_VAR
 WDTRESET                0 0x0000D008   # RST_WDT (debug)
 WDT                     0 0x0000D00C   # WDT timeout 0:OFF 1:sec
-LED                     0 0x0000D010   # LED 3..2 Green, 1..0 Red, (0:OFF, 1,2:BLINK, 3:ON)
+LED                     0 0x0000D010   # LED 1..0 Green, 3..2 Red, (0:OFF, 1,2:BLINK, 3:ON)
 CLK_SEL                 0 0x0000D018   # CLK_SEL
 
 # External I/O

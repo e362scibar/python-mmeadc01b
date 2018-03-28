@@ -316,7 +316,7 @@ static PyObject* mmeadc01b_register_interrupt_callback(PyObject* self, PyObject*
   int status, fd;
   void* cb;
   PyObject* ptr;
-  if(!PyArg_ParseTuple(args, "iO", &fd, &ptr)){
+  if(!PyArg_ParseTuple(args, "iI", &fd, &ptr)){
     return NULL;
   }
   cb = PyLong_AsVoidPtr(ptr);
@@ -367,19 +367,31 @@ static PyObject* mmeadc01b_get_waveform(PyObject* self, PyObject* args){
   wfm_adc = (PyArrayObject*)PyArray_SimpleNew(nd, dims_adc, NPY_FLOAT32);
   wfm_iq = (PyArrayObject*)PyArray_SimpleNew(nd, dims_iq, NPY_COMPLEX64);
   for(i=0; i<N_ADC_CH; i++){
+    int* p1 = dbuf[i];
     for(j=0; j<N_ADC_POINTS; j++){
-      int* p1 = dbuf[i];
       float* p2 = (float*)PyArray_GETPTR2(wfm_adc, (npy_intp)i, (npy_intp)j);
       *p2 = (float)((short)(p1[j]&0xFFFF));
+/*
+      if(j<10){
+        printf("%x ", p1[j]);
+      }
+*/
     }
+/*    printf("\n"); */
   }
   for(i=0; i<N_DDC_CH; i++){
+    int* p1 = dbuf[N_ADC_CH+i];
     for(j=0; j<N_DDC_POINTS; j++){
-      int* p1 = dbuf[N_ADC_CH+i];
-      float* p2 = (float*)PyArray_GETPTR2(wfm_adc, (npy_intp)i, (npy_intp)j);
+      float* p2 = (float*)PyArray_GETPTR2(wfm_iq, (npy_intp)i, (npy_intp)j);
       p2[0] = (float)((short)(p1[j]&0xFFFF));
       p2[1] = (float)((short)((p1[j]>>16)&0xFFFF));
+/*
+      if(j<10){
+        printf("%x ", p1[j]);
+      }
+*/
     }
+/*    printf("\n"); */
   }
   return Py_BuildValue("iOO", status, wfm_adc, wfm_iq);
 }
