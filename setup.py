@@ -1,5 +1,6 @@
 from distutils.core import setup, Extension
 import os
+import numpy as np
 
 ext_devapi = Extension("mmeadc01b.devapi",
                 sources=["src/devapi_wrap.c",
@@ -21,7 +22,8 @@ ext_devapi = Extension("mmeadc01b.devapi",
                         "src/devapi/dev_mmeadc01b_user_i2c_write.c",
                         "src/devapi/dev_mmeadc01b_util.c",
                         "src/devapi/dev_mmeadc01b_write.c"],
-                include_dirs=["src/devapi", "src/mmeadc01b", "src/upciedev"])
+                include_dirs=["src/devapi", "src/mmeadc01b", "src/upciedev",
+                    np.get_include()])
 
 setup(name="mmeadc01b",
                 version="1.0",

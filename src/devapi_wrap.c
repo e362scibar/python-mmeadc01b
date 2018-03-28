@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "dev_api_mmeadc01b.h"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include "numpy/arrayobject.h"
 
 #define NBUF 256
 
@@ -349,6 +351,39 @@ static PyObject* mmeadc01b_get_clk_src(PyObject* self, PyObject* args){
   return Py_BuildValue("ii", status, clk_src);
 }
 
+static PyObject* mmeadc01b_get_waveform(PyObject* self, PyObject* args){
+  int status=0, i, j;
+  void* dbuf[N_DMA_BUF];
+  int nd = 2;
+  npy_intp dims_adc[] = {N_ADC_CH, N_ADC_POINTS};
+  npy_intp dims_iq[] = {N_DDC_CH, N_DDC_POINTS};
+  PyObject* data;
+  PyArrayObject* wfm_adc;
+  PyArrayObject* wfm_iq;
+  if(!PyArg_ParseTuple(args, "O", &data)){
+    return NULL;
+  }
+  get_tuple_ptr(dbuf, data);
+  wfm_adc = (PyArrayObject*)PyArray_SimpleNew(nd, dims_adc, NPY_FLOAT32);
+  wfm_iq = (PyArrayObject*)PyArray_SimpleNew(nd, dims_iq, NPY_COMPLEX64);
+  for(i=0; i<N_ADC_CH; i++){
+    for(j=0; j<N_ADC_POINTS; j++){
+      int* p1 = dbuf[i];
+      float* p2 = (float*)PyArray_GETPTR2(wfm_adc, (npy_intp)i, (npy_intp)j);
+      *p2 = (float)((short)(p1[j]&0xFFFF));
+    }
+  }
+  for(i=0; i<N_DDC_CH; i++){
+    for(j=0; j<N_DDC_POINTS; j++){
+      int* p1 = dbuf[N_ADC_CH+i];
+      float* p2 = (float*)PyArray_GETPTR2(wfm_adc, (npy_intp)i, (npy_intp)j);
+      p2[0] = (float)((short)(p1[j]&0xFFFF));
+      p2[1] = (float)((short)((p1[j]>>16)&0xFFFF));
+    }
+  }
+  return Py_BuildValue("iOO", status, wfm_adc, wfm_iq);
+}
+
 /* Module definition */
 
 static PyMethodDef mmeadc01b_methods[] = {
@@ -371,6 +406,7 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"unregister_interrupt_callback", mmeadc01b_unregister_interrupt_callback, METH_VARARGS, "Unregister interrupt callback."},
   {"set_clk_src", mmeadc01b_set_clk_src, METH_VARARGS, "Set clock source."},
   {"get_clk_src", mmeadc01b_get_clk_src, METH_VARARGS, "Get clock source."},
+  {"get_waveform", mmeadc01b_get_waveform, METH_VARARGS, "Get waveform data."},
   {NULL, NULL, 0, NULL}
 };
 
@@ -383,6 +419,7 @@ static struct PyModuleDef mmeadc01b_module = {
 };
 
 PyMODINIT_FUNC PyInit_devapi(void){
+  import_array();
   return PyModule_Create(&mmeadc01b_module);
 }
 

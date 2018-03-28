@@ -1,6 +1,8 @@
 from . import devapi
 from .error import Error
+from .register import Register
 import ctypes
+import time
 
 class Device:
     """ MMEADC01B Device class """
@@ -9,6 +11,9 @@ class Device:
         self.fd = None
         self.devfile = None
         self.dmabuf = None
+        self.dmadone = False
+
+    # DevAPI Methods
     def open(self, devfile):
         fd = devapi.open(devfile)
         self.mmap_dma_buf()
@@ -166,5 +171,36 @@ class Device:
         if status:
             raise Error(status)
         return list(self.clk_src.keys())[list(delf.clk_src.values()).index(src)]
+
+    # Waveform methods
+    def callback(self, src):
+        self.dmadone = True
+    def wfm_init(self):
+        self.dmadone = False
+        self.write(Register("INTR_CLR"), 0)
+        self.write(Register("INTR_CLR"), 0x3)
+        self.write(Register("INTR_CLR"), 0)
+        self.write(Register("INTR_MASK"), 0)
+        self.register_interrupt_callback(self.callback)
+    def wfm_start(self):
+        self.dmadone = False
+        self.write(Register("WAVE_START"), 0)
+        self.write(Register("WAVE_START"), 1)
+        self.write(Register("WAVE_START"), 0)
+    def wfm_stop_soft(self):
+        self.write(Register("WAVE_SOFTTRG"), 0)
+        self.write(Register("WAVE_SOFTTRG"), 1)
+        self.write(Register("WAVE_SOFTTRG"), 0)
+    def wfm_terminate(self):
+        self.unregister_interrupt_callback()
+    def wfm_get(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmapped.")
+        if not self.dmadone:
+            time.sleep(0.1)
+            if not self.dmadone:
+                raise TimeoutError("Waveform timeout")
+        status, adc, iq = devapi.get_waveform(self.dmabuf)
+        return adc, iq
 
 
