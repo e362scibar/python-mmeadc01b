@@ -30,7 +30,7 @@ class Device:
     def write(self, reg, data):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if !isinstance(data, tuple):
+        if not isinstance(data, tuple):
             if isinstance(data, list):
                 data = tuple(data)
             else:
@@ -50,7 +50,7 @@ class Device:
     def adc_write(self, id_adc, addr, data):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if !isinstance(data, tuple):
+        if not isinstance(data, tuple):
             if isinstance(data, list):
                 data = tuple(data)
             else:
@@ -70,7 +70,7 @@ class Device:
     def dac_write(self, addr, data):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if !isinstance(data, tuple):
+        if not isinstance(data, tuple):
             if isinstance(data, list):
                 data = tuple(data)
             else:
@@ -81,7 +81,7 @@ class Device:
     def lmk_write(self, addr, data):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if !isinstance(data, tuple):
+        if not isinstance(data, tuple):
             if isinstance(data, list):
                 data = tuple(data)
             else:
@@ -101,7 +101,7 @@ class Device:
     def user_i2c_write(self, slv, ofs, data):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if !isinstance(data, tuple):
+        if not isinstance(data, tuple):
             if isinstance(data, list):
                 data = tuple(data)
             else:
@@ -154,7 +154,7 @@ class Device:
     def set_clk_src(self, src):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if !isinstance(src, int):
+        if not isinstance(src, int):
             src = self.clk_src[src]
         status = devapi.set_clk_src(self.fd, src)
         if status:
