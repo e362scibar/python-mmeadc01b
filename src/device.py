@@ -4,6 +4,12 @@ from .register import Register
 import ctypes
 import time
 
+callback_list = []
+
+def _callback(int_src):
+    for cb in callback_list:
+        cb(int_src)
+
 class Device:
     """ MMEADC01B Device class """
     clk_src = {"EXT":0, "RTM0":1, "RTM1":2, "INT":3}
@@ -148,18 +154,22 @@ class Device:
     def register_interrupt_callback(self, callback):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        functype = ctypes.CFUNCTYPE(None, ctypes.c_int)
-        cb = functype(callback)
-        ptr = ctypes.cast(cb, ctypes.c_void_p).value
-        status = devapi.register_interrupt_callback(self.fd, ptr)
+        if not callable(callback):
+            raise TypeError("Callback not callable.")
+        callback_list.append(callback)
+        status = devapi.register_interrupt_callback(self.fd, _callback)
         if status:
             raise Error(status)
-    def unregister_interrupt_callback(self):
+    def unregister_interrupt_callback(self, callback):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        status = devapi.unregister_interrupt_callback(self.fd)
-        if status:
-            raise Error(status)
+        if callback in callback_list:
+            callback_list.remove(callback)
+            status = devapi.unregister_interrupt_callback(self.fd)
+            if status:
+                raise Error(status)
+        else:
+            raise TypeError("Callback not registered.")
     def set_clk_src(self, src):
         if self.fd is None:
             raise RuntimeError("Device not opened.")

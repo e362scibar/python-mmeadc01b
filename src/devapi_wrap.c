@@ -93,6 +93,17 @@ static int get_tuple_ptr(void** buf, PyObject* data){
   return num;
 }
 
+/* Callback function */
+
+static int count_callback = 0;
+static PyObject* py_callback = NULL;
+
+static void mmeadc01b_callback(int int_src){
+  if(py_callback){
+    PyObject_CallObject(py_callback, Py_BuildValue("i", int_src));
+  }
+}
+
 /* Wrapper functions */
 
 static PyObject* mmeadc01b_open(PyObject* self, PyObject* args){
@@ -314,22 +325,34 @@ static PyObject* mmeadc01b_clear_dma_buf_status(PyObject* self, PyObject* args){
 
 static PyObject* mmeadc01b_register_interrupt_callback(PyObject* self, PyObject* args){
   int status, fd;
-  void* cb;
   PyObject* ptr;
-  if(!PyArg_ParseTuple(args, "iI", &fd, &ptr)){
+  if(!PyArg_ParseTuple(args, "iO", &fd, &ptr)){
     return NULL;
   }
-  cb = PyLong_AsVoidPtr(ptr);
-  status = dev_mmeadc01b_register_interrupt_callback(fd, cb, getpid());
+  if(!PyCallable_Check(ptr)){
+    PyErr_SetString(PyExc_TypeError, "Argument not callable");
+    return NULL;
+  }
+  status = dev_mmeadc01b_register_interrupt_callback(fd, mmeadc01b_callback, getpid());
+  if(status == 0){
+    count_callback++;
+    py_callback = ptr;
+  }
   return PyLong_FromLong(status);
 }
 
 static PyObject* mmeadc01b_unregister_interrupt_callback(PyObject* self, PyObject* args){
-  int status, fd;
+  int status=0, fd;
   if(!PyArg_ParseTuple(args, "i", &fd)){
     return NULL;
   }
-  status = dev_mmeadc01b_unregister_interrupt_callback(fd);
+  if(count_callback > 0){
+    count_callback--;
+  }
+  if(count_callback == 0){
+    status = dev_mmeadc01b_unregister_interrupt_callback(fd);
+    py_callback = NULL;
+  }
   return PyLong_FromLong(status);
 }
 
