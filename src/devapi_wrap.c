@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 #include "dev_api_mmeadc01b.h"
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
@@ -281,6 +282,7 @@ static PyObject* mmeadc01b_user_i2c_write(PyObject* self, PyObject* args){
 static PyObject* mmeadc01b_mmap_dma_buf(PyObject* self, PyObject* args){
   int status, fd;
   void* dbuf[N_DMA_BUF];
+  memset(dbuf, 0, sizeof(dbuf));
   if(!PyArg_ParseTuple(args, "i", &fd)){
     return NULL;
   }
