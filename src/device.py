@@ -4,12 +4,6 @@ from .register import Register
 import ctypes
 import time
 
-callback_list = []
-
-def _callback(int_src):
-    for cb in callback_list:
-        cb(int_src)
-
 class Device:
     """ MMEADC01B Device class """
     clk_src = {"EXT":0, "RTM0":1, "RTM1":2, "INT":3}
@@ -152,25 +146,22 @@ class Device:
         status = devapi.clear_dma_buf_status(self.fd)
         if status:
             raise Error(status)
-    def register_interrupt_callback(self, callback):
+    def register_interrupt_callback(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if not callable(callback):
-            raise TypeError("Callback not callable.")
-        callback_list.append(callback)
-        status = devapi.register_interrupt_callback(self.fd, _callback)
+        status = devapi.register_interrupt_callback(self.fd)
         if status:
             raise Error(status)
-    def unregister_interrupt_callback(self, callback):
+    def unregister_interrupt_callback(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if callback in callback_list:
-            callback_list.remove(callback)
-            status = devapi.unregister_interrupt_callback(self.fd)
-            if status:
-                raise Error(status)
-        else:
-            raise TypeError("Callback not registered.")
+        status = devapi.unregister_interrupt_callback(self.fd)
+        if status:
+            raise Error(status)
+    def get_interrupt_status(self):
+        return devapi.get_interrupt_status()
+    def reset_interrupt_status(self):
+        devapi.reset_interrupt_status()
     def set_clk_src(self, src):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
@@ -188,17 +179,16 @@ class Device:
         return list(self.clk_src.keys())[list(self.clk_src.values()).index(src)]
 
     # Waveform methods
-    def callback(self, src):
-        self.dmadone = True
     def wfm_init(self):
-        self.dmadone = False
         self.write(Register("INTR_CLR"), 0)
         self.write(Register("INTR_CLR"), 0x3)
         self.write(Register("INTR_CLR"), 0)
         self.write(Register("INTR_MASK"), 0)
-        #self.register_interrupt_callback(self.callback)
+        self.reset_interrupt_status()
+        self.register_interrupt_callback()
+        self.mmap_dma_buf()
     def wfm_start(self):
-        self.dmadone = False
+        self.reset_interrupt_status()
         self.write(Register("WAVE_START"), 0)
         self.write(Register("WAVE_START"), 1)
         self.write(Register("WAVE_START"), 0)
@@ -207,16 +197,17 @@ class Device:
         self.write(Register("WAVE_SOFTTRG"), 1)
         self.write(Register("WAVE_SOFTTRG"), 0)
     def wfm_terminate(self):
-        pass
-        #self.unregister_interrupt_callback()
+        self.munmap_dma_buf()
+        self.unregister_interrupt_callback()
     def wfm_get(self):
-        #if self.dmabuf is None:
-        #    raise RuntimeError("DMA buffer not mmapped.")
-        #if not self.dmadone:
-        #    time.sleep(0.1)
-        #    if not self.dmadone:
-        #        raise TimeoutError("Waveform timeout")
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmapped.")
+        if not self.get_interrupt_status()[0]:
+            time.sleep(0.1)
+            if not self.get_interrupt_status()[0]:
+                raise TimeoutError("Waveform timeout")
         status, adc, iq = devapi.get_waveform(self.dmabuf)
         return adc, iq
-
+    def wfm_enable(self):
+        self.clear_dma_buf_status()
 

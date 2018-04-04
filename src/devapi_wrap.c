@@ -96,13 +96,12 @@ static int get_tuple_ptr(void** buf, PyObject* data){
 
 /* Callback function */
 
-static int count_callback = 0;
-static PyObject* py_callback = NULL;
+static int callback_status = 0;
+static int callback_source = 0;
 
 static void mmeadc01b_callback(int int_src){
-  if(py_callback){
-    PyObject_CallObject(py_callback, Py_BuildValue("i", int_src));
-  }
+  callback_status = 1;
+  callback_source = int_src;
 }
 
 /* Wrapper functions */
@@ -327,19 +326,10 @@ static PyObject* mmeadc01b_clear_dma_buf_status(PyObject* self, PyObject* args){
 
 static PyObject* mmeadc01b_register_interrupt_callback(PyObject* self, PyObject* args){
   int status, fd;
-  PyObject* ptr;
-  if(!PyArg_ParseTuple(args, "iO", &fd, &ptr)){
-    return NULL;
-  }
-  if(!PyCallable_Check(ptr)){
-    PyErr_SetString(PyExc_TypeError, "Argument not callable");
+  if(!PyArg_ParseTuple(args, "i", &fd)){
     return NULL;
   }
   status = dev_mmeadc01b_register_interrupt_callback(fd, mmeadc01b_callback, getpid());
-  if(status == 0){
-    count_callback++;
-    py_callback = ptr;
-  }
   return PyLong_FromLong(status);
 }
 
@@ -348,14 +338,24 @@ static PyObject* mmeadc01b_unregister_interrupt_callback(PyObject* self, PyObjec
   if(!PyArg_ParseTuple(args, "i", &fd)){
     return NULL;
   }
-  if(count_callback > 0){
-    count_callback--;
-  }
-  if(count_callback == 0){
-    status = dev_mmeadc01b_unregister_interrupt_callback(fd);
-    py_callback = NULL;
-  }
+  status = dev_mmeadc01b_unregister_interrupt_callback(fd);
   return PyLong_FromLong(status);
+}
+
+static PyObject* mmeadc01b_get_interrupt_status(PyObject* self, PyObject* args){
+  if(!PyArg_ParseTuple(args, "")){
+    return NULL;
+  }
+  return Py_BuildValue("ii", callback_status, callback_source);
+}
+
+static PyObject* mmeadc01b_reset_interrupt_status(PyObject* self, PyObject* args){
+  if(!PyArg_ParseTuple(args, "")){
+    return NULL;
+  }
+  callback_status = 0;
+  callback_source = 0;
+  Py_RETURN_NONE;
 }
 
 static PyObject* mmeadc01b_set_clk_src(PyObject* self, PyObject* args){
@@ -441,6 +441,8 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"clear_dma_buf_status", mmeadc01b_clear_dma_buf_status, METH_VARARGS, "Clear DMA buffer status."},
   {"register_interrupt_callback", mmeadc01b_register_interrupt_callback, METH_VARARGS, "Register interrupt callback."},
   {"unregister_interrupt_callback", mmeadc01b_unregister_interrupt_callback, METH_VARARGS, "Unregister interrupt callback."},
+  {"get_interrupt_status", mmeadc01b_get_interrupt_status, METH_VARARGS, "Get interrupt status."},
+  {"reset_interrupt_status", mmeadc01b_reset_interrupt_status, METH_VARARGS, "Reset interrupt status."},
   {"set_clk_src", mmeadc01b_set_clk_src, METH_VARARGS, "Set clock source."},
   {"get_clk_src", mmeadc01b_get_clk_src, METH_VARARGS, "Get clock source."},
   {"get_waveform", mmeadc01b_get_waveform, METH_VARARGS, "Get waveform data."},
