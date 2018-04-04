@@ -184,7 +184,7 @@ class Device:
         status, src = devapi.get_clk_src(self.fd)
         if status:
             raise Error(status)
-        return list(self.clk_src.keys())[list(delf.clk_src.values()).index(src)]
+        return list(self.clk_src.keys())[list(self.clk_src.values()).index(src)]
 
     # Waveform methods
     def callback(self, src):
