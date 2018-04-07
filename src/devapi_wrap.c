@@ -259,7 +259,7 @@ static PyObject* mmeadc01b_user_i2c_write(PyObject* self, PyObject* args){
   unsigned char txbuf[NBUF+1];
   PyObject* data;
   i2c_fmt_t fmt;
-  if(!PyArg_ParseTuple(args, "iiO", &fd, &slv, &ofs, &data)){
+  if(!PyArg_ParseTuple(args, "iiiO", &fd, &slv, &ofs, &data)){
     return NULL;
   }
   num = get_tuple_char(&txbuf[1], data);

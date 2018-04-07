@@ -113,7 +113,7 @@ class Device:
                 data = tuple(data)
             else:
                 data = (data,)
-        status = devapi.dac_write(self.fd, addr, data)
+        status = devapi.user_i2c_write(self.fd, slv, ofs, data)
         if status:
             raise Error(status)
     def mmap_dma_buf(self):
