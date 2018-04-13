@@ -12,6 +12,11 @@ class Device:
         self.devfile = None
         self.dmabuf = None
         self.dmadone = False
+    def __del__(self):
+        try:
+            self.close()
+        except:
+            pass
 
     # DevAPI Methods
     def open(self, devfile):
