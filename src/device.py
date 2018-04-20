@@ -20,6 +20,7 @@ class Device:
 
     # DevAPI Methods
     def open(self, devfile):
+        self.devfile = devfile
         self.fd = devapi.open(devfile)
         #self.clear_dma_buf_status()
         #self.mmap_dma_buf()
@@ -30,6 +31,7 @@ class Device:
             self.munmap_dma_buf()
         devapi.close(self.fd)
         self.fd = None
+        self.devfile = None
     def read(self, reg, num=1):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
