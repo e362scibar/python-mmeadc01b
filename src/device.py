@@ -250,7 +250,7 @@ class Device:
         val = 0
         for i in len(ret):
             val |= (1<<i) if ret[i] else 0
-        self.write(Register("FIR_OF"), val)
+        self.write(Register("FIR_ON"), val)
     def get_fir_coeff(self, ch):
         if ch not in range(NCH):
             raise ValueError("Channel")
@@ -278,4 +278,26 @@ class Device:
         self.write(Register("FIR_COEFF_UPD"), 1)
         time.sleep(0.001)
         self.write(Register("FIR_COEFF_UPD"), 0)
+    def get_iir_coeff(self):
+        return self.read(Register("IQ_IIR_COEFF")) / 2**24
+    def set_iir_coeff(self, coeff=1.0e-3):
+        self.write(Register("IQ_IIR_COEFF"), int(coeff*2**24))
+    def get_iir_sw_all(self):
+        ret = self.read(Register("IQ_IIR_ON"))
+        return [bool((ret>>i)&1) for i in range(NCH)]
+    def get_iir_sw(self, ch):
+        return self.get_iir_sw_all()[ch]
+    def set_iir_sw_all(self, on=True):
+        val = 0
+        if on:
+            for i in range(NCH):
+                val |= (1<<i)
+        self.write(Register("IQ_IIR_ON"), val)
+    def set_iir_sw(self, ch, on=True):
+        ret = self.get_iir_sw_all()
+        ret[ch] = 1 if on else 0
+        val = 0
+        for i in len(ret):
+            val |= (1<<i) if ret[i] else 0
+        self.write(Register("IQ_IIR_ON"), val)
 
