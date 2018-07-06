@@ -3,6 +3,10 @@ from .error import Error
 from .register import Register
 import ctypes
 import time
+import numpy as np
+
+NCH = 10
+NFIR = 32
 
 class Device:
     """ MMEADC01B Device class """
@@ -217,4 +221,61 @@ class Device:
         return adc, iq
     def wfm_enable(self):
         self.clear_dma_buf_status()
+    def get_wfm_sample_step(self):
+        return self.read(Register("WAVE_SMPL_STEP"))
+    def set_wfm_sample_step(self, step):
+        if step not in range(65536):
+            raise ValueError("Too large step.")
+        self.write(Register("WAVE_SMPL_STEP"), step)
+
+    # Various methods
+    def jesd204b_reset(self):
+        self.write(Register("JESD204B_RST"), 1)
+        time.sleep(0.01)
+        self.write(Register("JESD204B_RST"), 0)
+    def get_fir_sw_all(self):
+        ret = self.read(Register("FIR_ON"))
+        return [bool((ret>>i)&1) for i in range(NCH)]
+    def get_fir_sw(self, ch):
+        return self.get_fir_sw_all()[ch]
+    def set_fir_sw_all(self, on=True):
+        val = 0
+        if on:
+            for i in range(NCH):
+                val |= (1<<i)
+        self.write(Register("FIR_ON"), val)
+    def set_fir_sw(self, ch, on=True):
+        ret = self.get_fir_sw_all()
+        ret[ch] = 1 if on else 0
+        val = 0
+        for i in len(ret):
+            val |= (1<<i) if ret[i] else 0
+        self.write(Register("FIR_OF"), val)
+    def get_fir_coeff(self, ch):
+        if ch not in range(NCH):
+            raise ValueError("Channel")
+        self.write(Register("FIR_COEFF_CHSEL"), ch)
+        fir = []
+        for i in range(NFIR):
+            ret = self.read(Register("FIR_COEFF_{:02d}".format(i)))
+            fir.append(np.int16(ret) / 2**14)
+        return fir
+    def set_fir_coeff(self, ch, coeff=[1]):
+        if ch not in range(NCH):
+            raise ValueError("Channel")
+        if len(coeff) < NFIR:
+            coeff.extend([0]*(NFIR-len(coeff)))
+        for i in range(NFIR):
+            ival = coeff[i]*2**14
+            if ival > 0x7fff:
+                val = 0x7fff
+            elif ival < -0x10000:
+                val = -0x10000
+            else:
+                val = int(ival)
+            self.write(Register("FIR_COEFF_{:02d}".format(i)), val)
+        self.write(Register("FIR_COEFF_CHSEL"), ch)
+        self.write(Register("FIR_COEFF_UPD"), 1)
+        time.sleep(0.001)
+        self.write(Register("FIR_COEFF_UPD"), 0)
 
