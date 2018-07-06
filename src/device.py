@@ -228,11 +228,13 @@ class Device:
             raise ValueError("Too large step.")
         self.write(Register("WAVE_SMPL_STEP"), step)
 
-    # Various methods
+    # Utility methods
     def jesd204b_reset(self):
         self.write(Register("JESD204B_RST"), 1)
         time.sleep(0.01)
         self.write(Register("JESD204B_RST"), 0)
+
+    # FIR filter methods
     def get_fir_sw_all(self):
         ret = self.read(Register("FIR_ON"))
         return [bool((ret>>i)&1) for i in range(NCH)]
@@ -278,6 +280,8 @@ class Device:
         self.write(Register("FIR_COEFF_UPD"), 1)
         time.sleep(0.001)
         self.write(Register("FIR_COEFF_UPD"), 0)
+
+    # IIR filter methods
     def get_iir_coeff(self):
         return self.read(Register("IQ_IIR_COEFF")) / 2**24
     def set_iir_coeff(self, coeff=1.0e-3):
@@ -300,4 +304,11 @@ class Device:
         for i in len(ret):
             val |= (1<<i) if ret[i] else 0
         self.write(Register("IQ_IIR_ON"), val)
+
+    # Realtime monitor
+    def get_iq(self):
+        ret = np.array(self.read(Register("MON_IQ01"), NCH))
+        I = (ret&0xffff).astype('int16') / 32768.
+        Q = ((ret>>16)&0xffff).astype('int16') / 32768.
+        return I + 1.j * Q
 
