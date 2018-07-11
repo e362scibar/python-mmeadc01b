@@ -307,8 +307,23 @@ class Device:
 
     # Realtime monitor
     def get_iq(self):
-        ret = np.array(self.read(Register("MON_IQ01"), NCH))
+        ret = np.array(self.read(Register("MON_IQ01"), NCH), dtype=np.int)
         I = (ret&0xffff).astype('int16') / 32768.
         Q = ((ret>>16)&0xffff).astype('int16') / 32768.
         return I + 1.j * Q
+
+    # Rotator functions
+    def get_rotator(self, ch='IQ01'):
+        reg_a = self.read(Register(ch+"_ROT_A"))
+        reg_b = self.read(Register(ch+"_ROT_B"))
+        reg_c = self.read(Register(ch+"_ROT_C"))
+        reg = np.array([reg_a, reg_b, reg_c], dtype=np.int16).astype(np.float)
+        return (reg[0] + 0.5j * (reg[2] - reg[1])) / 0x1000
+    def set_rotator(self, ch='IQ01', z=1.0):
+        reg_a = np.clip(np.around(np.real(z) * 0x1000), -0x8000, 0x7fff)
+        reg_b = np.clip(np.around(-np.imag(z) * 0x1000), -0x8000, 0x7fff)
+        reg_c = np.clip(np.around(np.imag(z) * 0x1000), -0x8000, 0x7fff)
+        self.write(Register(ch+"_ROT_A"), int(reg_a))
+        self.write(Register(ch+"_ROT_B"), int(reg_b))
+        self.write(Register(ch+"_ROT_C"), int(reg_c))
 
