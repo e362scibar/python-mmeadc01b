@@ -323,7 +323,7 @@ class Device:
         reg_a = np.clip(np.around(np.real(z) * 0x1000), -0x8000, 0x7fff)
         reg_b = np.clip(np.around(-np.imag(z) * 0x1000), -0x8000, 0x7fff)
         reg_c = np.clip(np.around(np.imag(z) * 0x1000), -0x8000, 0x7fff)
-        self.write(Register(ch+"_ROT_A"), int(reg_a))
-        self.write(Register(ch+"_ROT_B"), int(reg_b))
-        self.write(Register(ch+"_ROT_C"), int(reg_c))
+        self.write(Register(ch+"_ROT_A"), int(reg_a)&0xffff)
+        self.write(Register(ch+"_ROT_B"), int(reg_b)&0xffff)
+        self.write(Register(ch+"_ROT_C"), int(reg_c)&0xffff)
 
