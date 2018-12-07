@@ -20,15 +20,38 @@
 #include "./dev_mmeadc01b_util.h"        /* utilities   */
 
 /**
+ * @struct dev_mmeadc01b_rot_coeff_t
+ * @brief  Rotation coefficient
+ */
+typedef struct {
+    double     gain;            /* gain amount                        */
+    double     rad;             /* rotation angle theta (unit: [rad]) */
+} dev_mmeadc01b_rot_coeff_t;
+
+/**
  * @sturct dev_mmeadc01b_info_t
  * @brief  DEV API library info
  */
 typedef struct {
-    void    (*cb)(int int_src);    /* callback function for interrupts */
-    sem_t     sem;
+    void                     (*cb)(int int_src);    /* callback function for interrupts */
+    sem_t                      sem;
+    uint32_t                   cmplt;               /* DMA xfer completion status       */
+    dev_mmeadc01b_rot_coeff_t  rot[N_MMEADC01B_ROT_COEFF_IDS];
 } dev_mmeadc01b_info_t;
 static dev_mmeadc01b_info_t          dev_mmeadc01b_info = {
-    .cb = NULL,
+    .cb    = NULL,                 /* NULL:no cb function registed    */
+    .cmplt = 0,                    /*    0:no data xfered             */
+    .rot   = { { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 }, },
 };
 #define _get_dev_mmeadc01b_info()  (&dev_mmeadc01b_info)
 
@@ -98,6 +121,62 @@ dev_mmeadc01b_check_fpga_reg_range(int id_bar, int ofs, int num)
     return  stat;
 }
 
+
+/**
+ * dev_mmeadc01b_set_dma_xfer_cmplt()
+ * @brief    set DMA xfer completion status
+ *
+ * @param    [in]   cmplt                 uint32_t ::= DMA xfer completion status
+ * @return          stat                           ::= process status
+ */
+int
+dev_mmeadc01b_set_dma_xfer_cmplt            (uint32_t cmplt)
+{
+    int                   stat =  0;
+    dev_mmeadc01b_info_t *info = _get_dev_mmeadc01b_info();
+
+    info->cmplt |=  cmplt;
+
+    return  stat;
+}
+
+/**
+ * dev_mmeadc01b_clr_dma_xfer_cmplt()
+ * @brief    clear DMA xfer completion status
+ *
+ * @param    [in]   cmplt                 uint32_t ::= DMA xfer completion status to be cleared
+ * @return          stat                           ::= process status
+ */
+int
+dev_mmeadc01b_clr_dma_xfer_cmplt            (uint32_t cmplt)
+{
+    int                   stat =  0;
+    dev_mmeadc01b_info_t *info = _get_dev_mmeadc01b_info();
+
+    info->cmplt &= ~cmplt;
+
+    return  stat;
+}
+
+/**
+ * dev_mmeadc01b_get_dma_xfer_cmplt()
+ * @brief    get DMA xfer completion status
+ *
+ * @param    - none -
+ * @return          cmplt                 uint32_t ::= DMA xfer completion status
+ */
+uint32_t
+dev_mmeadc01b_get_dma_xfer_cmplt            (void)
+{
+    dev_mmeadc01b_info_t *info = _get_dev_mmeadc01b_info();
+    uint32_t              cmplt;
+
+    cmplt       = info->cmplt;
+    info->cmplt = 0;            /* auto cleared */
+
+    return  cmplt;
+}
+
 /**
  * _dev_mmeadc01b_sig_action()
  * @brief    an action(signal handler) for SIGNAL from child driver
@@ -126,6 +205,11 @@ _dev_mmeadc01b_sig_action(int signum, siginfo_t *sinfo, void *extra)
         } else {
             printf(" %s():[L%4d]: no callback function found, signum=%d\n",
                    __func__, __LINE__, signum);
+        }
+
+        {
+            uint32_t cmplt = MMEADC01B_CMPLT_AD | MMEADC01B_CMPLT_IO | MMEADC01B_CMPLT_SP;
+            dev_mmeadc01b_set_dma_xfer_cmplt(cmplt);
         }
     }
     sem_post(&info->sem);
@@ -178,6 +262,58 @@ dev_mmeadc01b_set_interrupt_callback(void *cb)
         /* clear the callback function */
         info->cb       = NULL;
     }
+
+    return  stat;
+}
+
+/**
+ * dev_mmeadc01b_set_util_rot_coeff()
+ * @brief    set DMA xfer completion status
+ *
+ * @param    [in]   id_ch      int  ::= rotation coeff. ch ID
+ * @param    [in]   gain     double ::= gain amount
+ * @param    [in]   rad      double ::= rotation angle theta (unit: [rad])
+ * @return          stat                           ::= process status
+ */
+int
+dev_mmeadc01b_util_set_rot_coeff    (int id_ch, double  gain, double  rad)
+{
+    int                         stat =  0;
+    dev_mmeadc01b_info_t       *info = _get_dev_mmeadc01b_info();
+    dev_mmeadc01b_rot_coeff_t  *rot;
+
+    if ((id_ch < 0) || (N_MMEADC01B_ROT_COEFF_IDS <= id_ch)) { /* out of range ? */
+        return  MMEADC01B_ERR_RANGE;
+    }
+
+    rot       = info->rot + id_ch;
+    rot->gain = gain;
+    rot->rad  = rad;
+
+    return  stat;
+}
+
+/**
+ * dev_mmeadc01b_get_util_rot_coeff()
+ * @brief    get DMA xfer completion status
+ *
+ * @param    - none -
+ * @return          cmplt                 uint32_t ::= DMA xfer completion status
+ */
+int
+dev_mmeadc01b_util_get_rot_coeff    (int id_ch, double *gain, double *rad)
+{
+    int                         stat =  0;
+    dev_mmeadc01b_info_t       *info = _get_dev_mmeadc01b_info();
+    dev_mmeadc01b_rot_coeff_t  *rot;
+
+    if ((id_ch < 0) || (N_MMEADC01B_ROT_COEFF_IDS <= id_ch)) { /* out of range ? */
+        return  MMEADC01B_ERR_RANGE;
+    }
+
+    rot       = info->rot + id_ch;
+    *gain     =  rot->gain;
+    *rad      =  rot->rad;
 
     return  stat;
 }

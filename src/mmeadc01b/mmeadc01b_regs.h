@@ -23,10 +23,29 @@
 #define    N_ADC_POINTS                           (16 << 10)             /* # of ADC sampling points/SRAM  16k[pt]  */
 #define    N_DDC_POINTS                           ( 4 << 10)             /* # of DDC sampling points/SRAM   4k[pt]  */
 #define    N_DAC_POINTS                           ( 8 << 10)             /* # of DAC sampling points/SRAM   8k[pt]  */
+#define   N_TONE_POINTS                           (     256)             /* # of CAL Tone     points/SRAM  256[pt]  */
+#define     N_SP_POINTS                           ( 4 << 10)             /* # of SP           points/SRAM   4k[pt]  */
+#define    N_BPM_POINTS_TBT                       (64 << 10)             /* # of BPM COD TbT  points/SRAM  64k[pt]  */
+#define    N_BPM_POINTS_FA                        (64 << 10)             /* # of BPM COD FA   points/SRAM  64k[pt]  */
+#define    N_BPM_POINTS_SA                        (     256)             /* # of BPM COD SA   points/SRAM  256[pt]  */
+#define    N_BPM_POINTS_SP                        (64 << 10)             /* # of BPM SP Proc  points/SRAM  64k[pt]  */
 
-#define  LEN_ADC_DAT                          (N_ADC_POINTS * 4)         /* length of ADC sampling data (unit: [B]) */
-#define  LEN_DDC_DAT                          (N_DDC_POINTS * 4)         /* length of DDC sampling data (unit: [B]) */
-#define  LEN_DAC_DAT                          (N_DAC_POINTS * 4)         /* length of DAC sampling data (unit: [B]) */
+#define  LEN_ADC_DAT                          (N_ADC_POINTS      * 4)   /* length of ADC sampling data (unit: [B]) */
+#define  LEN_DDC_DAT                          (N_DDC_POINTS      * 4)   /* length of DDC sampling data (unit: [B]) */
+#define  LEN_DAC_DAT                          (N_DAC_POINTS      * 4)   /* length of DAC sampling data (unit: [B]) */
+#define  LEN_TONE_DAT                        (N_TONE_POINTS *  8 * 4)   /* length of CAL Tone     data (unit: [B]) */
+#define  LEN_SP_DAT                          (  N_SP_POINTS      * 4)   /* length of Single Path  data (unit: [B]) */
+#define  LEN_BPM_DAT_TBT                 ( N_BPM_POINTS_TBT * 16 * 4)   /* length of BPM COD TbT  data (unit: [B]) */
+#define  LEN_BPM_DAT_FA                  ( N_BPM_POINTS_FA  * 16 * 4)   /* length of BPM COD FA   data (unit: [B]) */
+#define  LEN_BPM_DAT_SA                  ( N_BPM_POINTS_SA  * 32 * 4)   /* length of BPM COD SA   data (unit: [B]) */
+#define  LEN_BPM_DAT_SP                  ( N_BPM_POINTS_SP  * 64 * 4)   /* length of BPM SP Proc  data (unit: [B]) */
+
+#define  LEN_BPM_DAT_UNIT_TBT  (16 * 4)
+#define  LEN_BPM_DAT_UNIT_FA   (16 * 4)
+#define  LEN_BPM_DAT_UNIT_SA   (32 * 4)
+#define  LEN_BPM_DAT_UNIT_SP   (64 * 4)
+
+#define  LEN_BPM_DAT_SP_AREA             ( N_BPM_POINTS_SP  * 64    )   /* length of BPM SP Proc  data (unit: [B]) */
 
 /*  - ADC                     */
 #define  N_MMEADC01B_ADC_DEV                              5              /* # of ADCs imped on this board    */
@@ -43,7 +62,7 @@
 #define  N_MMEADC01B_DAC_CH        (N_MMEADC01B_DAC_DEV * N_MMEADC01B_DAC_DEV_CH) /* total # of DAC channels */
 
 /*  - data channels           */
-#define  ADC_CH_1                                         0 /* ADC channels */
+#define  ADC_CH_1                                         0  /* ADC channels */
 #define  ADC_CH_2                                         1
 #define  ADC_CH_3                                         2
 #define  ADC_CH_4                                         3
@@ -53,7 +72,7 @@
 #define  ADC_CH_8                                         7
 #define  ADC_CH_9                                         8
 #define  ADC_CH_10                                        9
-#define  DDC_CH_IQ_1                                     10 /* DDC channels */
+#define  DDC_CH_IQ_1                                     10  /* DDC channels */
 #define  DDC_CH_IQ_2                                     11
 #define  DDC_CH_IQ_3                                     12
 #define  DDC_CH_IQ_4                                     13
@@ -69,26 +88,76 @@
 #define  DDC_CH_IQ_14                                    23
 #define  DDC_CH_IQ_15                                    24
 #define  DDC_CH_IQ_16                                    25
-#define  N_MMEADC01B_CH                                  26 /* total # of channels on MME-ADC01-B */
+#define  TONE_CH_1                                       26  /* CAL Tone ch */
+#define  TONE_CH_2                                       27
+#define  TONE_CH_3                                       28
+#define  TONE_CH_4                                       29
+#define  TONE_CH_5                                       30
+#define  TONE_CH_6                                       31
+#define  TONE_CH_7                                       32
+#define  TONE_CH_8                                       33
+#define  TONE_CH_9                                       34
+#define  TONE_CH_10                                      35
+#define  SP_CH_1                                         36  /* SP  channels */
+#define  SP_CH_2                                         37
+#define  SP_CH_3                                         38
+#define  SP_CH_4                                         39
+#define  SP_CH_7                                         40
+#define  SP_CH_8                                         41
+#define  SP_CH_9                                         42
+#define  SP_CH_10                                        43
+//#define  N_MMEADC01B_CH                                  44  /* total # of channels on MME-ADC01-B */
 
-#define  N_ADC_CH                                        10 /* ADC: 5 devices x 2 ch      */
-#define  N_DDC_CH                                        16 /* DDC: ADC 10ch + 6 extra ch */
+#define  BPM_CH_1_TBT                                    44
+#define  BPM_CH_1_FA                                     45
+#define  BPM_CH_1_SA                                     46
+#define  BPM_CH_1_SP_1                                   47 /* BPM 1  > SP Process: 1    of 4 */
+#define  BPM_CH_1_SP_2                                   48 /* BPM 1  > SP Process:  2   of 4 */
+#define  BPM_CH_1_SP_3                                   49 /* BPM 1  > SP Process:   3  of 4 */
+#define  BPM_CH_1_SP_4                                   50 /* BPM 1  > SP Process:    4 of 4 */
+#define  BPM_CH_2_TBT                                    51
+#define  BPM_CH_2_FA                                     52
+#define  BPM_CH_2_SA                                     53
+#define  BPM_CH_2_SP_1                                   54 /* BPM  2 > SP Process: 1    of 4 */
+#define  BPM_CH_2_SP_2                                   55 /* BPM  2 > SP Process:  2   of 4 */
+#define  BPM_CH_2_SP_3                                   56 /* BPM  2 > SP Process:   3  of 4 */
+#define  BPM_CH_2_SP_4                                   57 /* BPM  2 > SP Process:    4 of 4 */
+#define  N_MMEADC01B_CH                                  58  /* total # of channels on MME-ADC01-B */
 
-/*  - INT source channels     */
+#define  N_ADC_CH                                        10      /* ADC: 5 devices x 2 ch      */
+#define  N_DDC_CH                                        16      /* DDC: ADC 10ch + 6 extra ch */
+#define  N_TONE_CH                                 N_ADC_CH      /* same as ADC channels       */
+#define  N_SP_CH                                  (N_ADC_CH - 2) /* -2: ch 5 and 6             */
+#define  N_BPM_CH                                         2      /* BPM1 and BPM2              */
+#define  N_BPM_SP_AREAS                                   4      /* SP Process consists of 4 areas */
+
+/** @todo:ymzk: 26ch -> 44ch  */
+/*  - DATA acq. channels      */
 /*
+ *    6 6 6 6 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 3
+ *    3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2
+ *   +---------------+---------------+---+-+-+-------+-------+-------+
+ *   |                                   |B|B|               | CAL   |
+ *   |            (_Reserved_)           |P|P| SP ch 10-1    |  TONE |
+ *   |                                   |M|M| (except ch6-5)| ch    |
+ *   |                                   |2|1|               |  10-7 |
+ *   +---------------+---------------+---+-+-+-------+-------+-------+
+ *
  *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
  *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
  *   +-----------+---+-------+-------+-----------+---+---------------+
- *   |           | DDC extra |                   |                   |
- *   |_Reserved_ |  ch 15-11 | DDC ch 10-1/base  | ADC ch 10-1       |
+ *   | CAL Tone  | DDC extra |                   |                   |
+ *   |   ch 6-1  |  ch 15-11 | DDC ch 10-1/base  | ADC ch 10-1       |
  *   |           |  (I/Q)    |  (I/Q)            |  (RAW)            |
- *   +-----------+-----------+-------------------+-------------------+
- *             bit 31   : DMA
- *             bit 30   : Inter lock
- *             bit 29-26: _(_Reseved_)
- *             bit 25-20: DDC ch 16-11 (I/Q) extra-data (internally generated)
- *             bit 19-10: DDC ch 10-1  (I/Q)  base
- *             bit  9-0 : ADC ch 10-1
+ *   +-----------+---+-------+-------+-----------+---+---------------+
+ *             bit 63-46: _(_Reseved_)
+ *             bit 45   : BPM2
+ *             bit 44   : BPM1
+ *             bit 43-36: SP        ch 10/9/8/7/4/3/2/1
+ *             bit 35-26: CAL Tone  ch 10-1
+ *             bit 25-20: DDC       ch 16-11 (I/Q) extra-data (internally generated)
+ *             bit 19-10: DDC       ch 10-1  (I/Q)  base
+ *             bit  9-0 : ADC       ch 10-1
  */
 #define  DAT_CH_ADC_1                                  BIT0
 #define  DAT_CH_ADC_2                                  BIT1
@@ -118,9 +187,36 @@
 #define  DAT_CH_DDC_IQ_15                             BIT24
 #define  DAT_CH_DDC_IQ_16                             BIT25
 
-#define  DAT_CH_ADC                              0x000003FF /* bit  9-0  */
-#define  DAT_CH_DDC                              0x03FFFC00 /* bit 25-10 */
-#define  DAC_CH_ACQ                (DAT_CH_ADC | DAT_CH_DDC)
+#define  DAT_CH_TONE_1                                BIT26
+#define  DAT_CH_TONE_2                                BIT27
+#define  DAT_CH_TONE_3                                BIT28
+#define  DAT_CH_TONE_4                                BIT29
+#define  DAT_CH_TONE_5                                BIT30
+#define  DAT_CH_TONE_6                                BIT31
+#define  DAT_CH_TONE_7                                BIT32
+#define  DAT_CH_TONE_8                                BIT33
+#define  DAT_CH_TONE_9                                BIT34
+#define  DAT_CH_TONE_10                               BIT35
+
+#define  DAT_CH_SP_1                                  BIT36
+#define  DAT_CH_SP_2                                  BIT37
+#define  DAT_CH_SP_3                                  BIT38
+#define  DAT_CH_SP_4                                  BIT39
+#define  DAT_CH_SP_7                                  BIT40
+#define  DAT_CH_SP_8                                  BIT41
+#define  DAT_CH_SP_9                                  BIT42
+#define  DAT_CH_SP_10                                 BIT43
+
+#define  DAT_CH_BPM_1                                 BIT44
+#define  DAT_CH_BPM_2                                 BIT45
+
+#define  DAT_CH_ADC                              0x000003FF  /* bit  9-0  */
+#define  DAT_CH_DDC                              0x03FFFC00  /* bit 25-10 */
+#define  DAT_CH_TONE          __UINT64_C(0x0000000FFC000000) /* bit 35-26 */
+#define  DAT_CH_SP            __UINT64_C(0x00000FF000000000) /* bit 43-36 */
+#define  DAT_CH_BPM1          __UINT64_C(0x0000100000000000) /* bit 44    */
+#define  DAT_CH_BPM2          __UINT64_C(0x0000200000000000) /* bit 45    */
+#define  DAT_CH_ACQ                     (DAT_CH_ADC | DAT_CH_DDC | DAT_CH_TONE | DAT_CH_SP)
 
 /*
  * INT_SRC:
@@ -128,21 +224,29 @@
  * INT_MSK:
  *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
  *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- *   +-+-+-----------+---------------+---------------+-----------+-+-+
- *   |D|I|                                                       |D|A|
- *   |M|L|                      (_Reserved_)                     |D|D|
- *   |A|K|                                                       |C|C|
- *   +-+-+-------------------------------------------------------+-+-+
+ *   +-+-+-----------+---------------+-----------+-+-+---------+-+-+-+
+ *   |D|I|                                       |B|B|         |S|I|A|
+ *   |M|L|             (_Reserved_)              |P|P| (_RSVD_)|P|/|D|
+ *   |A|K|                                       |M|M|         | |Q|C|
+ *   | | |                                       |2|1|         | | | |
+ *   +-+-+-----------+---------------+-----------+-+-+---------+-+-+-+
  *             bit 31   : DMA
  *             bit 30   : Inter lock
- *             bit 29-2 : (_Reserved_)
- *             bit  1   : any DDC ch
- *             bit  0   : any ADC ch
+ *             bit 29-10: (_Reserved_)
+ *             bit  9   : BPM2 data       (T.B.D.)
+ *             bit  8   : BPM1 data
+ *             bit  7-3 : (_Reserved_)
+ *             bit  2   : SP  ch
+ *             bit  1   : I/Q ch
+ *             bit  0   : ADC ch
  */
 #define  INT_SRC_NONE                                     0 /* no interrupt occured */
 
 #define  INT_SRC_DMA                                  BIT31
 #define  INT_SRC_INTL                                 BIT30
+#define  INT_SRC_BPM2                                  BIT9
+#define  INT_SRC_BPM1                                  BIT8
+#define  INT_SRC_SP                                    BIT2
 #define  INT_SRC_DDC                                   BIT1
 #define  INT_SRC_ADC                                   BIT0
 
@@ -214,9 +318,13 @@
 #define  MMEADC01B_REG_DAC_PAT_REPEAT            0x0000D0A0              /* DAC_PAT_REPEAT     */
 #define  MMEADC01B_REG_DAC_PAT_DEPTH             0x0000D0A4              /* DAC_PAT_DEPTH      */
 #define  MMEADC01B_REG_DAC_PAT_UPD               0x0000D0A8              /* DAC_PAT_UPD        */
-#define  MMEADC01B_REG_DAC_OUT_ROT_A             0x0000D0B0              /* DAC_OUT_ROT_A      */
-#define  MMEADC01B_REG_DAC_OUT_ROT_B             0x0000D0B4              /* DAC_OUT_ROT_B      */
-#define  MMEADC01B_REG_DAC_OUT_ROT_C             0x0000D0B8              /* DAC_OUT_ROT_C      */
+
+#define  MMEADC01B_REG_DAC_OUT_ROT_GAIN          0x0000D0B0              /* DAC_OUT_ROT_GAIN   */
+#define  MMEADC01B_REG_DAC_OUT_ROT_THETA         0x0000D0B4              /* DAC_OUT_ROT_THETA  */
+
+#define  MMEADC01B_DAC_OUT_ROT_GAIN_LSB              0x1000              /*  LSB = 2^12        */
+#define  MMEADC01B_DAC_OUT_ROT_THETA_LSB             0x8000              /*  LSB = 2^15        */
+
 #define  MMEADC01B_REG_DAC_OUT_LIMIT             0x0000D0BC              /* DAC_OUT_LIMIT      */
 #define  MMEADC01B_REG_DAC_OUT_OFS               0x0000D0C0              /* DAC_OUT_OFS        */
 #define  MMEADC01B_REG_DAC_OUT_STEP              0x0000D0C4              /* DAC_OUT_STEP       */
@@ -282,7 +390,7 @@
 #define  N_MMEADC01B_SW_CONFIG_REG_0                      0
 #define  N_MMEADC01B_SW_CONFIG_REGS                       1
 
-#define  N_MMEADC01B_REG_SW_CONFIG(id_swconf)   (MMEADC01B_REG_SW_CONFIG_0 * ((id_swconf) * 4)
+#define  N_MMEADC01B_REG_SW_CONFIG(id_swconf)   (MMEADC01B_REG_SW_CONFIG_0 + ((id_swconf) * 4))
 
 /*  BAR 0: waveform acquisition */
 #define  MMEADC01B_REG_ADC_REC_START             0x0000F000              /* ADC_REC_START/SRAM */
@@ -375,6 +483,20 @@
 
 #define  MMEADC01B_REG_MON_IQ(ch)               (MMEADC01B_REG_MON_IQ01 + ((ch) * 4))
 
+/*  BAR 0: waveform > ADC peak hold (abs) */
+#define  MMEADC01B_REG_PEAKHOLD_ADC01            0x0000F120              /* PEAKHOLD_ADC01     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC02            0x0000F124              /* PEAKHOLD_ADC02     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC03            0x0000F128              /* PEAKHOLD_ADC03     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC04            0x0000F12C              /* PEAKHOLD_ADC04     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC05            0x0000F130              /* PEAKHOLD_ADC05     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC06            0x0000F134              /* PEAKHOLD_ADC06     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC07            0x0000F138              /* PEAKHOLD_ADC07     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC08            0x0000F13C              /* PEAKHOLD_ADC08     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC09            0x0000F140              /* PEAKHOLD_ADC09     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC10            0x0000F144              /* PEAKHOLD_ADC10     */
+
+#define  MMEADC01B_REG_PEAKHOLD_ADC(ch)         (MMEADC01B_REG_PEAKHOLD_ADC01 + ((ch) * 4))
+
 /* ************************************************************: BAR 2 */
 #define  LEN_MMEADC01B_BAR_2                       (2 << 20)             /* BAR 2:   2 [MB]    */
 /*   BAR 2: SRAM memory map */
@@ -446,9 +568,14 @@
  *        B = <gain> x -sinθ
  *        C = <gain> x  sinθ
  */
-#define  MMEADC01B_REG_ADC_ROT_COEFF_A(ch)      (0x00000050 + ((ch) * 4)) /* ADC_ROT_COEFF_A(ch) */
-#define  MMEADC01B_REG_ADC_ROT_COEFF_B(ch)      (0x00000078 + ((ch) * 4)) /* ADC_ROT_COEFF_B(ch) */
-#define  MMEADC01B_REG_ADC_ROT_COEFF_C(ch)      (0x000000A0 + ((ch) * 4)) /* ADC_ROT_COEFF_C(ch) */
+#define  MMEADC01B_REG_IQ_ROT_COEFF_A(ch)       (0x00000050 + ((ch) * 4)) /* IQ_ROT_COEFF_A(ch) */
+#define  MMEADC01B_REG_IQ_ROT_COEFF_B(ch)       (0x00000078 + ((ch) * 4)) /* IQ_ROT_COEFF_B(ch) */
+#define  MMEADC01B_REG_IQ_ROT_COEFF_C(ch)       (0x000000A0 + ((ch) * 4)) /* IQ_ROT_COEFF_C(ch) */
+
+#define  N_MMEADC01B_IQ_ROT_COEFF_CH                     10              /* # of iq rot ch     */
+#define  MIN_MMEADC01B_REG_IQ_ROT_COEFF                  -8.0
+#define  MAX_MMEADC01B_REG_IQ_ROT_COEFF                   8.0
+#define  MMEADC01B_IQ_ROT_COEFF_LSB                  0x4000
 
 /*  BAR 4: vector sum */
 #define  MMEADC01B_REG_VECTSUM_CAV_FB            0x000000D0              /* VECTSUM_CAV_FB     */
@@ -482,10 +609,11 @@
  * INTL_SRC_2:
  *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
  *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- *   +-----------------------+-------------------+-------------------+
- *   |     (_Reserved_)      |        I/Q        |        ADC        |
- *   +-----------------------+-------------------+-------------------+
- *             bit 31-20: (_Reserved_)
+ *   +-------------------+---+-------------------+-------------------+
+ *   |     (_Reserved_)  |BPM|        I/Q        |        ADC        |
+ *   +-------------------+---+-------------------+-------------------+
+ *             bit 31-22: (_Reserved_)
+ *             bit 21-20: BPM                 (BPM     2-1)
  *             bit 19-10: ADC                 (ADC ch 10-1)
  *             bit  9-0 : I/Q                 (I/Q ch 10-1)
  */
@@ -496,6 +624,7 @@
 
 #define  INTL_SRC_ADC                            0x000003FF
 #define  INTL_SRC_IQ                             0x000FFC00
+#define  INTL_SRC_BPM                            0x00300000
 
 #define  INTL_ID_1                                        0              /* Interlock ID 1     */
 #define  INTL_ID_2                                        1              /* Interlock ID 2     */
@@ -611,66 +740,555 @@
 #define  MMEADC01B_REG_FIR_COEFF_30              0x000010C8              /* FIR_COEFF_30       */
 #define  MMEADC01B_REG_FIR_COEFF_31              0x000010CC              /* FIR_COEFF_31       */
 
+#define  N_MMEADC01B_REG_FIR_COEFFS                      32
 #define  MMEADC01B_REG_FIR_COEFF(id_coeff)      (MMEADC01B_REG_FIR_COEFF_0 + ((id_coeff) * 4))
 
 /*  BAR 4: I/Q CIC filter coefficients */
 #define  MMEADC01B_REG_CIC_DECIM_RATE_UPD        0x000010E0              /* CIC_DECIM_RATE_UPD */
 #define  MMEADC01B_REG_CIC_DECIM_RATE            0x000010E4              /* CIC_DECIM_RATE     */
 
-/*  BAR 4: feedback control */
-#define  MMEADC01B_REG_IIR_COEFF_CAV             0x00002000              /* IIR_COEFF_CAV      */
-#define  MMEADC01B_REG_IIR_COEFF_KLY             0x00002004              /* IIR_COEFF_KLY      */
-#define  MMEADC01B_REG_IIR_ON_CAV                0x00002008              /* IIR_ON_CAV         */
-#define  MMEADC01B_REG_IIR_ON_KLY                0x0000200C              /* IIR_ON_KLY         */
-#define  MMEADC01B_REG_REF_IQ_CAV                0x00002010              /* REF_IQ_CAV         */
-#define  MMEADC01B_REG_SV_CONST                  0x00002014              /* SV_CONST           */
-#define  MMEADC01B_REG_SV_SW                     0x00002018              /* SV_SW              */
-#define  MMEADC01B_REG_FB_ON                     0x0000201C              /* FB_ON              */
-#define  MMEADC01B_REG_P_GAIN_I_KLY              0x00002020              /* P_GAIN_I_KLY       */
-#define  MMEADC01B_REG_P_GAIN_Q_KLY              0x00002024              /* P_GAIN_Q_KLY       */
-#define  MMEADC01B_REG_I_GAIN_I_KLY              0x00002028              /* I_GAIN_I_KLY       */
-#define  MMEADC01B_REG_I_GAIN_Q_KLY              0x0000202C              /* I_GAIN_Q_KLY       */
-#define  MMEADC01B_REG_P_GAIN_I_CAV              0x00002030              /* P_GAIN_I_CAV       */
-#define  MMEADC01B_REG_P_GAIN_Q_CAV              0x00002034              /* P_GAIN_Q_CAV       */
-#define  MMEADC01B_REG_I_GAIN_I_CAV              0x00002038              /* I_GAIN_I_CAV       */
-#define  MMEADC01B_REG_I_GAIN_Q_CAV              0x0000203C              /* I_GAIN_Q_CAV       */
-#define  MMEADC01B_REG_FF_BASE                   0x00002040              /* FF_BASE            */
-#define  MMEADC01B_REG_FF_BASE_FACT              0x00002044              /* FF_BASE_FACT       */
-#define  MMEADC01B_REG_FF_NCO_FREQ_ST            0x00002048              /* FF_NCO_FREQ_ST     */
-#define  MMEADC01B_REG_FF_NCO_FREQ_ED            0x0000204C              /* FF_NCO_FREQ_ED     */
-#define  MMEADC01B_REG_FF_NCO_INC_RATE           0x00002050              /* FF_NCO_INC_RATE    */
-#define  MMEADC01B_REG_FF_NCO_RST                0x00002054              /* FF_NCO_RST         */
-#define  MMEADC01B_REG_PLL_ON_KLY                0x00002058              /* PLL_ON_KLY         */
-#define  MMEADC01B_REG_THOLD_DLT_Q               0x0000205C              /* THOLD_DLT_Q        */
-#define  MMEADC01B_REG_THETA_CYC                 0x00002060              /* THETA_CYC          */
-#define  MMEADC01B_REG_THETA_STEP                0x00002064              /* THETA_STEP         */
-#define  MMEADC01B_REG_THETA_DIR                 0x00002068              /* THETA_DIR          */
-#define  MMEADC01B_REG_SMON_THETA                0x0000206C              /* SMON_THETA         */
-#define  MMEADC01B_REG_SMON_DLT_Q                0x00002070              /* SMON_DLT_Q         */
-#define  MMEADC01B_REG_SMON_PLL_KLY              0x00002074              /* SMON_PLL_KLY       */
-#define  MMEADC01B_REG_PLL_RST_KLY               0x00002078              /* PLL_RST_KLY        */
-#define  MMEADC01B_REG_PLL_LL_KLY                0x0000207C              /* PLL_LL_KLY         */
-#define  MMEADC01B_REG_SMON_PLL_IQ_KLY           0x00002080              /* SMON_PLL_IQ_KLY    */
-#define  MMEADC01B_REG_SMON_THOLD                0x00002084              /* SMON_THOLD         */
-#define  MMEADC01B_REG_KLY_CAL_ROT_A             0x00002088              /* KLY_CAL_ROT_A      */
-#define  MMEADC01B_REG_KLY_CAL_ROT_B             0x0000208C              /* KLY_CAL_ROT_B      */
-#define  MMEADC01B_REG_KLY_CAL_ROT_V             0x00002090              /* KLY_CAL_ROT_V      */
-#define  MMEADC01B_REG_MV_CONST                  0x00002094              /* MV_CONST           */
-#define  MMEADC01B_REG_MC_SW                     0x00002098              /* MC_SW              */
+/*  BAR 4: COD > down sampling trigger */
+#define  MMEADC01B_REG_COD_DS_INIT_TRIG          0x00100000              /* COD_DS_INIT_TRIG   */
 
-/*  BAR 4: real-time monitor */
-#define  MMEADC01B_REG_MON_IIR_CAV               0x00002100              /* MON_IIR_CAV        */
-#define  MMEADC01B_REG_MON_IIR_KLY               0x00002104              /* MON_IIR_KLY        */
-#define  MMEADC01B_REG_MON_PRE_PI_KLY            0x00002108              /* MON_PRE_PI_KLY     */
-#define  MMEADC01B_REG_MON_POST_PI_KLY           0x0000210C              /* MON_POST_PI_KLY    */
-#define  MMEADC01B_REG_MON_PRE_PI_CAV            0x00002110              /* MON_PRE_PI_CAV     */
-#define  MMEADC01B_REG_MON_POST_PI_CAV           0x00002114              /* MON_POST_PI_CAV    */
-#define  MMEADC01B_REG_MON_SV                    0x00002118              /* MON_SV             */
-#define  MMEADC01B_REG_MON_FF                    0x0000211C              /* MON_FF             */
-#define  MMEADC01B_REG_MON_DAC_ROT               0x00002120              /* MON_DAC_ROT        */
-#define  MMEADC01B_REG_MON_RFSW                  0x00002124              /* MON_RFSW           */
-#define  MMEADC01B_REG_MON_DAC_LIMIT             0x00002128              /* MON_DAC_LIMIT      */
-#define  MMEADC01B_REG_MON_DAC_OFS               0x0000212C              /* MON_DAC_OFS        */
-#define  MMEADC01B_REG_MON_MV                    0x00002130              /* MON_MV             */
+/*  BAR 4: COD > CIC filter / decimator */
+#define  MMEADC01B_REG_COD_CIC_R_TBT_UPD         0x00100010              /*  */
+#define  MMEADC01B_REG_COD_CIC_R_TBT             0x00100014              /*  */
+#define  MMEADC01B_REG_COD_CIC_R_FA_UPD          0x00100018              /*  */
+#define  MMEADC01B_REG_COD_CIC_R_FA              0x0010001C              /*  */
+#define  MMEADC01B_REG_COD_CIC_R_SA_UPD          0x00100020              /*  */
+#define  MMEADC01B_REG_COD_CIC_R_SA              0x00100024              /*  */
+
+/*  BAR 4: COD > CIC down-sampler */
+#define  MMEADC01B_REG_COD_DS_T_TBT_UPD          0x00100028              /*  */
+#define  MMEADC01B_REG_COD_DS_T_TBT              0x0010002C              /*  */
+#define  MMEADC01B_REG_COD_DS_T_FA_UPD           0x00100030              /*  */
+#define  MMEADC01B_REG_COD_DS_T_FA               0x00100034              /*  */
+#define  MMEADC01B_REG_COD_DS_T_SA_UPD           0x00100038              /*  */
+#define  MMEADC01B_REG_COD_DS_T_SA               0x0010003C              /*  */
+
+/*  BAR 4: COD > FIR filter coefficients */
+#define  MMEADC01B_REG_COD_FIR_ON                0x00100040              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_UPD         0x00100044              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_CHSEL       0x00100048              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_STRSEL      0x0010004C              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_00          0x00100050              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_01          0x00100054              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_02          0x00100058              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_03          0x0010005C              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_04          0x00100060              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_05          0x00100064              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_06          0x00100068              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_07          0x0010006C              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_08          0x00100070              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_09          0x00100074              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_10          0x00100078              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_11          0x0010007C              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_12          0x00100080              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_13          0x00100084              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_14          0x00100088              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_15          0x0010008C              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_16          0x00100090              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_17          0x00100094              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_18          0x00100098              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_19          0x0010009C              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_20          0x001000A0              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_21          0x001000A4              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_22          0x001000A8              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_23          0x001000AC              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_24          0x001000B0              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_25          0x001000B4              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_26          0x001000B8              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_27          0x001000BC              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_28          0x001000C0              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_29          0x001000C4              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_30          0x001000C8              /*  */
+#define  MMEADC01B_REG_COD_FIR_COEFF_31          0x001000CC              /*  */
+
+#define  N_MMEADC01B_REG_COD_FIR_COEFFS                  32
+#define  MMEADC01B_REG_COD_FIR_COEFF(id_coeff)   (MMEADC01B_REG_COD_FIR_COEFF_00 + ((id_coeff) * 4))
+
+/*  BAR 4: SP  >  revolution frequency sync trigger */
+#define  MMEADC01B_REG_SP_REV_INIT_TRIG          0x00100100              /*  */
+
+/*  BAR 4: SP  >  waveform acquisition */
+#define  MMEADC01B_REG_SP_REC_START              0x00100110              /*  */
+
+#define  MMEADC01B_REG_SP_WAVE_SMPL_STEP         0x00100114              /*  */
+#define  MMEADC01B_REG_SP_WAVE_TRIG_DELAY        0x00100118              /*  */
+
+/*
+ * 31 30          16 15             0
+ * +-+--------------+----------------+
+ * |W| next address to be stored     |
+ * +-+--------------+----------------+
+ *
+ *   bit 31  : wrapped            ... 0:no wrapped, 1:wrapped
+ *   bit 30-0: next address       ... next address to be stored
+ */
+#define  MMEADC01B_REG_SP_ADDR                   0x00100120              /*  */
+
+#define  MMEADC01B_REG_SP_MASK_SEL               0x00100124              /*  */
+
+/*  BAR 4: SP   > waveform > trigger mode */
+#define  MMEADC01B_REG_SP_TRIG_FORCED            0x00000130              /*  */
+#define  MMEADC01B_REG_SP_DI_TRIG_EN             0x00000134              /*  */
+
+/*  BAR 4: BPM  > data xfer */
+#define  MMEADC01B_REG_BPM_TX_CTRL               0x00100140              /*  */
+#define  MMEADC01B_REG_BPM_TX_MODE               0x00100144              /*  */
+
+#define  MMEADC01B_REG_BPM1_COD_BAR_TBT          0x00100150              /*  */
+#define  MMEADC01B_REG_BPM1_COD_BAR_FA           0x00100154              /*  */
+#define  MMEADC01B_REG_BPM1_COD_BAR_SA           0x00100158              /*  */
+#define  MMEADC01B_REG_BPM1_SP_BAR               0x0010015C              /*  */
+
+#define  MMEADC01B_REG_BPM2_COD_BAR_TBT          0x00100160              /*  */
+#define  MMEADC01B_REG_BPM2_COD_BAR_FA           0x00100164              /*  */
+#define  MMEADC01B_REG_BPM2_COD_BAR_SA           0x00100168              /*  */
+#define  MMEADC01B_REG_BPM2_SP_BAR               0x0010016C              /*  */
+
+#define  MMEADC01B_REG_BPM1_INTL_COD_BAR_TBT     0x00100170              /*  */
+#define  MMEADC01B_REG_BPM1_INTL_COD_BAR_FA      0x00100174              /*  */
+#define  MMEADC01B_REG_BPM1_INTL_COD_BAR_SA      0x00100178              /*  */
+#define  MMEADC01B_REG_BPM1_INTL_SP_BAR          0x0010017C              /*  */
+
+#define  MMEADC01B_REG_BPM2_INTL_COD_BAR_TBT     0x00100180              /*  */
+#define  MMEADC01B_REG_BPM2_INTL_COD_BAR_FA      0x00100184              /*  */
+#define  MMEADC01B_REG_BPM2_INTL_COD_BAR_SA      0x00100188              /*  */
+#define  MMEADC01B_REG_BPM2_INTL_SP_BAR          0x0010018C              /*  */
+
+#define  MMEADC01B_REG_BPM1_COD_CAP_TBT          0x00100190              /*  */
+#define  MMEADC01B_REG_BPM1_COD_CAP_FA           0x00100194              /*  */
+#define  MMEADC01B_REG_BPM1_COD_CAP_SA           0x00100198              /*  */
+#define  MMEADC01B_REG_BPM1_SP_CAP               0x0010019C              /*  */
+
+#define  MMEADC01B_REG_BPM2_COD_CAP_TBT          0x001001A0              /*  */
+#define  MMEADC01B_REG_BPM2_COD_CAP_FA           0x001001A4              /*  */
+#define  MMEADC01B_REG_BPM2_COD_CAP_SA           0x001001A8              /*  */
+#define  MMEADC01B_REG_BPM2_SP_CAP               0x001001AC              /*  */
+
+#define  MMEADC01B_REG_BPM1_INTL_COD_CAP_TBT     0x001001B0              /*  */
+#define  MMEADC01B_REG_BPM1_INTL_COD_CAP_FA      0x001001B4              /*  */
+#define  MMEADC01B_REG_BPM1_INTL_COD_CAP_SA      0x001001B8              /*  */
+#define  MMEADC01B_REG_BPM1_INTL_SP_CAP          0x001001BC              /*  */
+
+#define  MMEADC01B_REG_BPM2_INTL_COD_CAP_TBT     0x001001C0              /*  */
+#define  MMEADC01B_REG_BPM2_INTL_COD_CAP_FA      0x001001C4              /*  */
+#define  MMEADC01B_REG_BPM2_INTL_COD_CAP_SA      0x001001C8              /*  */
+#define  MMEADC01B_REG_BPM2_INTL_SP_CAP          0x001001CC              /*  */
+
+/*  BAR 4: BPM  > amplitude offsets */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_1         0x00101000              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_2         0x00101004              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_3         0x00101008              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_4         0x0010100C              /*  */
+//#define  MMEADC01B_REG_BPM_OFS_COD_TBT_5                               /*  */
+//#define  MMEADC01B_REG_BPM_OFS_COD_TBT_6                               /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_7         0x00101010              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_8         0x00101014              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_9         0x00101018              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_TBT_10        0x0010101C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_1          0x00101020              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_2          0x00101024              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_3          0x00101028              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_4          0x0010102C              /*  */
+//#define  MMEADC01B_REG_BPM_OFS_COD_FA_5                                /*  */
+//#define  MMEADC01B_REG_BPM_OFS_COD_FA_6                                /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_7          0x00101030              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_8          0x00101034              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_9          0x00101038              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_FA_10         0x0010103C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_1          0x00101040              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_2          0x00101044              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_3          0x00101048              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_4          0x0010104C              /*  */
+//#define  MMEADC01B_REG_BPM_OFS_COD_SA_5                                /*  */
+//#define  MMEADC01B_REG_BPM_OFS_COD_SA_6                                /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_7          0x00101050              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_8          0x00101054              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_9          0x00101058              /*  */
+#define  MMEADC01B_REG_BPM_OFS_COD_SA_10         0x0010105C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_1        0x00101060              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_1        0x00101064              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_1        0x00101068              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_1        0x0010106C              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_1        0x00101070              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_1        0x00101074              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_1        0x00101078              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_1        0x0010107C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_2        0x00101080              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_2        0x00101084              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_2        0x00101088              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_2        0x0010108C              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_2        0x00101090              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_2        0x00101094              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_2        0x00101098              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_2        0x0010109C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_3        0x001010A0              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_3        0x001010A4              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_3        0x001010A8              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_3        0x001010AC              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_3        0x001010B0              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_3        0x001010B4              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_3        0x001010B8              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_3        0x001010BC              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_4        0x001010C0              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_4        0x001010C4              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_4        0x001010C8              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_4        0x001010CC              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_4        0x001010D0              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_4        0x001010D4              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_4        0x001010D8              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_4        0x001010DC              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_7        0x001010E0              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_7        0x001010E4              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_7        0x001010E8              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_7        0x001010EC              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_7        0x001010F0              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_7        0x001010F4              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_7        0x001010F8              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_7        0x001010FC              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_8        0x00101100              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_8        0x00101104              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_8        0x00101108              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_8        0x0010110C              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_8        0x00101110              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_8        0x00101114              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_8        0x00101118              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_8        0x0010111C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_9        0x00101120              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_9        0x00101124              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_9        0x00101128              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_9        0x0010112C              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_9        0x00101130              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_9        0x00101134              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_9        0x00101138              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_9        0x0010113C              /*  */
+
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK1_10       0x00101140              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK2_10       0x00101144              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK3_10       0x00101148              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK4_10       0x0010114C              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK5_10       0x00101150              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK6_10       0x00101154              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK7_10       0x00101158              /*  */
+#define  MMEADC01B_REG_BPM_OFS_SP_MASK8_10       0x0010115C              /*  */
+
+/*  BAR 4: BPM  > COD FA w/ three detectors */
+#define  MMEADC01B_REG_BPM3_COD_FA_3_SEL         0x00100160              /*  */
+
+/*  BAR 4: BPM  > interlock for COD FA */
+#define  MMEADC01B_REG_BPM_SELF_TRIG_EN          0x00100170              /*  */
+#define  MMEADC01B_REG_BPM_SELF_TRIG_SRC         0x00100174              /*  */
+
+#define  MMEADC01B_REG_BPM1_X_THOLD_SELFTRIG_H   0x00100178              /*  */
+#define  MMEADC01B_REG_BPM1_Y_THOLD_SELFTRIG_H   0x0010017C              /*  */
+#define  MMEADC01B_REG_BPM1_X_THOLD_SELFTRIG_L   0x00100180              /*  */
+#define  MMEADC01B_REG_BPM1_Y_THOLD_SELFTRIG_L   0x00100184              /*  */
+
+#define  MMEADC01B_REG_BPM2_X_THOLD_SELFTRIG_H   0x00100188              /*  */
+#define  MMEADC01B_REG_BPM2_Y_THOLD_SELFTRIG_H   0x0010018C              /*  */
+#define  MMEADC01B_REG_BPM2_X_THOLD_SELFTRIG_L   0x00100190              /*  */
+#define  MMEADC01B_REG_BPM2_Y_THOLD_SELFTRIG_L   0x00100194              /*  */
+
+/*  BAR 4: BPM  > DEBUG */
+#define  MMEADC01B_REG_BPM_DEBUG_SET0            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET1            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET2            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET3            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET4            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET5            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET6            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_SET7            0x00100000              /*  */
+
+#define  MMEADC01B_REG_BPM_DEBUG_MON0            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON1            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON2            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON3            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON4            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON5            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON6            0x00100000              /*  */
+#define  MMEADC01B_REG_BPM_DEBUG_MON7            0x00100000              /*  */
+
+/*  BAR 4: CAL Tone > configuration */
+#define  MMEADC01B_REG_TONE_NCO_1_FREQ           0x00102000              /*  */
+#define  MMEADC01B_REG_TONE_NCO_2_FREQ           0x00102004              /*  */
+#define  MMEADC01B_REG_TONE_NCO_3_FREQ           0x00102008              /*  */
+#define  MMEADC01B_REG_TONE_NCO_4_FREQ           0x0010200C              /*  */
+
+#define  MMEADC01B_REG_TONE_CIC1_R_UPD           0x00102010              /*  */
+#define  MMEADC01B_REG_TONE_CIC1_R               0x00102014              /*  */
+#define  MMEADC01B_REG_TONE_CIC2_R_UPD           0x00102018              /*  */
+#define  MMEADC01B_REG_TONE_CIC2_R               0x0010201C              /*  */
+#define  MMEADC01B_REG_TONE_DS_T_UPD             0x00102020              /*  */
+#define  MMEADC01B_REG_TONE_DS_T                 0x00102024              /*  */
+
+/*  BAR 4: CAL Tone > gain */
+#define  MMEADC01B_REG_TONE_GAIN1_1              0x00102040              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_1              0x00102044              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_1              0x00102048              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_1              0x0010204C              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_2              0x00102050              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_2              0x00102054              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_2              0x00102058              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_2              0x0010205C              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_3              0x00102060              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_3              0x00102064              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_3              0x00102068              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_3              0x0010206C              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_4              0x00102070              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_4              0x00102074              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_4              0x00102078              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_4              0x0010207C              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_5              0x00102080              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_5              0x00102084              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_5              0x00102088              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_5              0x0010208C              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_6              0x00102090              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_6              0x00102094              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_6              0x00102098              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_6              0x0010209C              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_7              0x001020A0              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_7              0x001020A4              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_7              0x001020A8              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_7              0x001020AC              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_8              0x001020B0              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_8              0x001020B4              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_8              0x001020B8              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_8              0x001020BC              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_9              0x001020C0              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_9              0x001020C4              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_9              0x001020C8              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_9              0x001020CC              /*  */
+#define  MMEADC01B_REG_TONE_GAIN1_10             0x001020D0              /*  */
+#define  MMEADC01B_REG_TONE_GAIN2_10             0x001020D4              /*  */
+#define  MMEADC01B_REG_TONE_GAIN3_10             0x001020D8              /*  */
+#define  MMEADC01B_REG_TONE_GAIN4_10             0x001020DC              /*  */
+
+/*  BAR 4: CAL Tone > FIR filter coefficients */
+#define  MMEADC01B_REG_TONE_FIR_ON               0x00102100              /*  */
+#define  MMEADC01B_REG_TONE_FIR_UPD              0x00102108              /*  */
+#define  MMEADC01B_REG_TONE_FIR_CH_SEL           0x0010210C              /*  */
+
+/*  BAR 4: CAL Tone > FIR filter coefficients */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_0          0x00102110              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_1          0x00102114              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_2          0x00102118              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_3          0x0010211C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_4          0x00102120              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_5          0x00102124              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_6          0x00102128              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_7          0x0010212C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_8          0x00102130              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_9          0x00102134              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_10         0x00102138              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_11         0x0010213C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_12         0x00102140              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_13         0x00102144              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_14         0x00102148              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_15         0x0010214C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_16         0x00102150              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_17         0x00102154              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_18         0x00102158              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_19         0x0010215C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_20         0x00102160              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_21         0x00102164              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_22         0x00102168              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_23         0x0010216C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_24         0x00102170              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_25         0x00102174              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_26         0x00102178              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_27         0x0010217C              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_28         0x00102180              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_29         0x00102184              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_30         0x00102188              /*  */
+#define  MMEADC01B_REG_TONE_FIR_COEFF_31         0x0010218C              /*  */
+
+/*  BAR 4: CAL Tone >   */
+#define  MMEADC01B_REG_TONE_TX_CTRL_L            0x001021A0              /*  */
+#define  MMEADC01B_REG_TONE_TX_CTRL_H            0x001021A4              /*  */
+#define  MMEADC01B_REG_TONE_CH_SEL_L             0x001021A8              /*  */
+#define  MMEADC01B_REG_TONE_CH_SEL_H             0x001021AC              /*  */
+#define  MMEADC01B_REG_TONE_TRANS_TIME           0x001021B0              /*  */
+
+/*
+ * 31 30          16 15 12 11       0
+ * +-+--------------+-----+----------+
+ * |W|    (_Reserved_)    | nxt addr |
+ * +-+--------------+-----+----------+
+ *
+ *   bit 31   : wrapped            ... 0:no wrapped, 1:wrapped
+ *   bit 30-12: (_Reserved_)
+ *   bit 11-0 : next address       ... next address to be stored
+ */
+#define  MMEADC01B_REG_TONE_ADDR_1               0x001021B8              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_2               0x001021BC              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_3               0x001021C0              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_4               0x001021C4              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_5               0x001021C8              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_6               0x001021CC              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_7               0x001021D0              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_8               0x001021D4              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_9               0x001021D8              /*  */
+#define  MMEADC01B_REG_TONE_ADDR_10              0x001021DC              /*  */
+
+#define  MMEADC01B_REG_TONE_ADDR(ch)    (MMEADC01B_REG_TONE_ADDR_1 + ((ch) * 4))
+
+#define  MMEADC01B_REG_TONE_CURR_CH_L            0x001021E0              /*  */
+#define  MMEADC01B_REG_TONE_CURR_CH_H            0x001021E4              /*  */
+
+/*  BAR 4: SP   > BPM mask  */
+/*
+* mast bits assignment each mask (mask 1-8):
+ *          31                               0
+ *          +---------------------------------+
+ *   0x0000 |31                              0|
+ *          +---------------------------------+
+ *   0x0004 |63                             32|
+ *          +---------------------------------+
+ *      :                    :
+ *          +---------------------------------+
+ *   0x01FC |4095                         4064|
+ *          +---------------------------------+
+ */
+#define  MMEADC01B_REG_SP_BPM1_MASK1             0x00180000              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK2             0x00180200              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK3             0x00180400              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK4             0x00180600              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK5             0x00180800              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK6             0x00180A00              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK7             0x00180C00              /*  */
+#define  MMEADC01B_REG_SP_BPM1_MASK8             0x00180E00              /*  */
+
+#define  MMEADC01B_REG_SP_BPM2_MASK1             0x00181000              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK2             0x00181200              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK3             0x00181400              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK4             0x00181600              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK5             0x00181800              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK6             0x00181A00              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK7             0x00181C00              /*  */
+#define  MMEADC01B_REG_SP_BPM2_MASK8             0x00181E00              /*  */
+
+/*  BAR 4: SP   > coefficients of polynominal  */
+#define  MMEADC01B_REG_BPM1_POLY_4NODE_A00       0x001A0000              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_4NODE_B00       0x001A0100              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_1_A00     0x001A0200              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_1_B00     0x001A0300              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_2_A00     0x001A0400              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_2_B00     0x001A0500              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_3_A00     0x001A0600              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_3_B00     0x001A0700              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_4_A00     0x001A0800              /*  */
+#define  MMEADC01B_REG_BPM1_POLY_3NODE_4_B00     0x001A0900              /*  */
+
+#define  MMEADC01B_REG_BPM2_POLY_4NODE_A00       0x001A0A00              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_4NODE_B00       0x001A0B00              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_1_A00     0x001A0C00              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_1_B00     0x001A0D00              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_2_A00     0x001A0E00              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_2_B00     0x001A0F00              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_3_A00     0x001A1000              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_3_B00     0x001A1100              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_4_A00     0x001A1200              /*  */
+#define  MMEADC01B_REG_BPM2_POLY_3NODE_4_B00     0x001A1300              /*  */
+
+#define            OFS_SP_POLY_00                      0x00              /*  */
+#define            OFS_SP_POLY_01                      0x04              /*  */
+#define            OFS_SP_POLY_02                      0x08              /*  */
+#define            OFS_SP_POLY_03                      0x0C              /*  */
+#define            OFS_SP_POLY_04                      0x10              /*  */
+#define            OFS_SP_POLY_05                      0x14              /*  */
+#define            OFS_SP_POLY_06                      0x18              /*  */
+#define            OFS_SP_POLY_07                      0x1C              /*  */
+#define            OFS_SP_POLY_10                      0x20              /*  */
+#define            OFS_SP_POLY_11                      0x24              /*  */
+#define            OFS_SP_POLY_12                      0x28              /*  */
+#define            OFS_SP_POLY_13                      0x2C              /*  */
+#define            OFS_SP_POLY_14                      0x30              /*  */
+#define            OFS_SP_POLY_15                      0x34              /*  */
+#define            OFS_SP_POLY_16                      0x38              /*  */
+#define            OFS_SP_POLY_20                      0x40              /*  */
+#define            OFS_SP_POLY_21                      0x44              /*  */
+#define            OFS_SP_POLY_22                      0x48              /*  */
+#define            OFS_SP_POLY_23                      0x4C              /*  */
+#define            OFS_SP_POLY_24                      0x50              /*  */
+#define            OFS_SP_POLY_25                      0x54              /*  */
+#define            OFS_SP_POLY_30                      0x60              /*  */
+#define            OFS_SP_POLY_31                      0x64              /*  */
+#define            OFS_SP_POLY_32                      0x68              /*  */
+#define            OFS_SP_POLY_33                      0x6C              /*  */
+#define            OFS_SP_POLY_34                      0x70              /*  */
+#define            OFS_SP_POLY_40                      0x80              /*  */
+#define            OFS_SP_POLY_41                      0x84              /*  */
+#define            OFS_SP_POLY_42                      0x88              /*  */
+#define            OFS_SP_POLY_43                      0x8C              /*  */
+#define            OFS_SP_POLY_50                      0xA0              /*  */
+#define            OFS_SP_POLY_51                      0xA4              /*  */
+#define            OFS_SP_POLY_52                      0xA8              /*  */
+#define            OFS_SP_POLY_60                      0xC0              /*  */
+#define            OFS_SP_POLY_61                      0xC4              /*  */
+#define            OFS_SP_POLY_70                      0xE0              /*  */
+
+/*  BAR 4: CAL Tone >  */
+/*
+ * CAL TONE:                        pt:                                    TONE:                            I, Q:
+ *  +-----------------------+ ------ +--------------------+  -------------  +--------------------+ --------- +--------------------+
+ *  | ADC ch 1 (pt: 0..255) |        | [0]                | TONE 1..4       | TONE 1             | I, Q      | I                  |
+ *  +-----------------------+        +--------------------+                 +--------------------+ _         +--------------------+
+ *  | ADC ch 2              | \      | [1]                |  \              | TONE  2            |    - _    |   Q                |
+ *  +-----------------------+  \     +--------------------+     \           +--------------------+         - +--------------------+
+ *  | ADC ch 3              |   \    | [2]                |        \        | TONE   3           |
+ *  +-----------------------+        +--------------------+           \     +--------------------+
+ *          :                                :                           \  | TONE    4          |
+ *  +-----------------------+     \  +--------------------+                 +--------------------+
+ *  | ADC ch 10             |      \ | [255]              |
+ *  +-----------------------+        +--------------------+
+ */
+#define  MMEADC01B_REG_TONE_1                    0x001C0000              /*  */
+#define  MMEADC01B_REG_TONE_2                    0x001C2000              /*  */
+#define  MMEADC01B_REG_TONE_3                    0x001C4000              /*  */
+#define  MMEADC01B_REG_TONE_4                    0x001C6000              /*  */
+#define  MMEADC01B_REG_TONE_5                    0x001C8000              /*  */
+#define  MMEADC01B_REG_TONE_6                    0x001CA000              /*  */
+#define  MMEADC01B_REG_TONE_7                    0x001CC000              /*  */
+#define  MMEADC01B_REG_TONE_8                    0x001CE000              /*  */
+#define  MMEADC01B_REG_TONE_9                    0x001D0000              /*  */
+#define  MMEADC01B_REG_TONE_10                   0x001D2000              /*  */
+
+#define  N_MMEADC01B_CAL_POINTS                         256
+
+#define  N_MMEADC01B_CAL_TONES                            4
+
+#define            OFS_TONE1_I                         0x00              /*  */
+#define            OFS_TONE1_Q                         0x04              /*  */
+#define            OFS_TONE2_I                         0x08              /*  */
+#define            OFS_TONE2_Q                         0x0C              /*  */
+#define            OFS_TONE3_I                         0x10              /*  */
+#define            OFS_TONE3_Q                         0x14              /*  */
+#define            OFS_TONE4_I                         0x18              /*  */
+#define            OFS_TONE4_Q                         0x1C              /*  */
+
+#define  MMEADC01B_REG_SRAM_TONE(ch)    (MMEADC01B_REG_TONE_1 + (LEN_TONE_DAT  * (ch)))
+
+/*  BAR 4: SP  > waveform */
+#define  MMEADC01B_REG_SP_1                      0x001E0000              /*  */
+#define  MMEADC01B_REG_SP_2                      0x001E4000              /*  */
+#define  MMEADC01B_REG_SP_3                      0x001E8000              /*  */
+#define  MMEADC01B_REG_SP_4                      0x001EC000              /*  */
+#define  MMEADC01B_REG_SP_7                      0x001F0000              /*  */
+#define  MMEADC01B_REG_SP_8                      0x001F4000              /*  */
+#define  MMEADC01B_REG_SP_9                      0x001F8000              /*  */
+#define  MMEADC01B_REG_SP_10                     0x001FC000              /*  */
+
+#define  MMEADC01B_REG_SRAM_SP(ch_msk)    (MMEADC01B_REG_SP_1 + (LEN_SP_DAT  * (ch_msk)))
 
 #endif  /* MMEADC01B_REGS_H */
