@@ -13,9 +13,9 @@
 #include <sys/ioctl.h>                   /* ioctl()     */
 #include <sys/time.h>                    /* timeval     */
 
-#include "../mmeadc01b/mmeadc01b_defs.h" /* IOCTL cmd   */
-#include "./dev_api_mmeadc01b.h"         /* own library */
-#include "./dev_mmeadc01b_util.h"        /* utilities   */
+#include "mmeadc01b_defs.h"              /* IOCTL cmd   */
+#include "dev_api_mmeadc01b.h"           /* own library */
+#include "dev_mmeadc01b_util.h"          /* utilities   */
 
 /**
  * dev_mmeadc01b_unregister_interrupt_callback()

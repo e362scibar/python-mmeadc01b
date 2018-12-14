@@ -13,17 +13,16 @@
 #include <sys/ioctl.h>                   /* ioctl()     */
 #include <sys/time.h>                    /* timeval     */
 
-#include "../mmeadc01b/mmeadc01b_defs.h" /* IOCTL cmd   */
-#include "./dev_api_mmeadc01b.h"         /* own library */
+#include "mmeadc01b_defs.h"              /* IOCTL cmd   */
+#include "dev_api_mmeadc01b.h"           /* own library */
 
 /**
  * dev_mmeadc01b_user_i2c_write()
  * @brief    write data to   slave device via User I2C bus
  *
- * @param    [in]   buf        char ::= input command  (<op> <arg>[<delim><arg>])
- * @param    [in]  *delim      char ::= input command delimier
- * @param    [out] *args[]     char ::= split w/ dilimiter ' '
- * @return          stat            ::= process status
+ * @param    [in]      fd        int   ::= file descriptor of the MME-ADC01-B
+ * @param    [in,out] *fmt   i2c_fmt_t ::= I2C data format
+ * @return             stat            ::= process status
  */
 int
 dev_mmeadc01b_user_i2c_write                (int fd,       i2c_fmt_t *fmt)

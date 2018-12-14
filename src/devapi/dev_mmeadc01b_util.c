@@ -11,24 +11,46 @@
 #include <stdio.h>                       /* printf()    */
 #include <stdint.h>                      /* uint32_t    */
 #include <string.h>                      /* memset()    */
+#include <sys/ioctl.h>                   /* ioctl()     */
 #include <sys/time.h>                    /* timeval     */
 #include <signal.h>                      /* sigaction   */
 #include <semaphore.h>                   /* sem_wait()  */
 
-#include "../mmeadc01b/mmeadc01b_defs.h" /* ioctl       */
-#include "./dev_api_mmeadc01b.h"         /* own libraly */
-#include "./dev_mmeadc01b_util.h"        /* utilities   */
+#include "mmeadc01b_defs.h"              /* IOCTL cmd   */
+#include "dev_api_mmeadc01b.h"           /* own library */
+#include "dev_mmeadc01b_util.h"          /* utilities   */
+
+/**
+ * @struct dev_mmeadc01b_rot_coeff_t
+ * @brief  Rotation coefficient
+ */
+typedef struct {
+    double     gain;            /* gain amount                        */
+    double     rad;             /* rotation angle theta (unit: [rad]) */
+} dev_mmeadc01b_rot_coeff_t;
 
 /**
  * @sturct dev_mmeadc01b_info_t
  * @brief  DEV API library info
  */
 typedef struct {
-    void    (*cb)(int int_src);    /* callback function for interrupts */
-    sem_t     sem;
+    void                     (*cb)(int int_src);    /* callback function for interrupts */
+    sem_t                      sem;
+    dev_mmeadc01b_rot_coeff_t  rot[N_MMEADC01B_ROT_COEFF_IDS];
 } dev_mmeadc01b_info_t;
 static dev_mmeadc01b_info_t          dev_mmeadc01b_info = {
-    .cb = NULL,
+    .cb    = NULL,                 /* NULL:no cb function registed    */
+    .rot   = { { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 },
+               { 1.0 , 0.0 }, },
 };
 #define _get_dev_mmeadc01b_info()  (&dev_mmeadc01b_info)
 
@@ -97,6 +119,7 @@ dev_mmeadc01b_check_fpga_reg_range(int id_bar, int ofs, int num)
 
     return  stat;
 }
+
 
 /**
  * _dev_mmeadc01b_sig_action()
@@ -178,6 +201,58 @@ dev_mmeadc01b_set_interrupt_callback(void *cb)
         /* clear the callback function */
         info->cb       = NULL;
     }
+
+    return  stat;
+}
+
+/**
+ * dev_mmeadc01b_set_util_rot_coeff()
+ * @brief    set DMA xfer completion status
+ *
+ * @param    [in]   id_ch      int  ::= rotation coeff. ch ID
+ * @param    [in]   gain     double ::= gain amount
+ * @param    [in]   rad      double ::= rotation angle theta (unit: [rad])
+ * @return          stat                           ::= process status
+ */
+int
+dev_mmeadc01b_util_set_rot_coeff    (int id_ch, double  gain, double  rad)
+{
+    int                         stat =  0;
+    dev_mmeadc01b_info_t       *info = _get_dev_mmeadc01b_info();
+    dev_mmeadc01b_rot_coeff_t  *rot;
+
+    if ((id_ch < 0) || (N_MMEADC01B_ROT_COEFF_IDS <= id_ch)) { /* out of range ? */
+        return  MMEADC01B_ERR_RANGE;
+    }
+
+    rot       = info->rot + id_ch;
+    rot->gain = gain;
+    rot->rad  = rad;
+
+    return  stat;
+}
+
+/**
+ * dev_mmeadc01b_get_util_rot_coeff()
+ * @brief    get DMA xfer completion status
+ *
+ * @param    - none -
+ * @return          cmplt                 uint32_t ::= DMA xfer completion status
+ */
+int
+dev_mmeadc01b_util_get_rot_coeff    (int id_ch, double *gain, double *rad)
+{
+    int                         stat =  0;
+    dev_mmeadc01b_info_t       *info = _get_dev_mmeadc01b_info();
+    dev_mmeadc01b_rot_coeff_t  *rot;
+
+    if ((id_ch < 0) || (N_MMEADC01B_ROT_COEFF_IDS <= id_ch)) { /* out of range ? */
+        return  MMEADC01B_ERR_RANGE;
+    }
+
+    rot       = info->rot + id_ch;
+    *gain     =  rot->gain;
+    *rad      =  rot->rad;
 
     return  stat;
 }

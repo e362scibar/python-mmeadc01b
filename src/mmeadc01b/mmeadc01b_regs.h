@@ -1,6 +1,6 @@
 /**
  * @file     mmeadc01b_regs.h
- * @brief    MME-ADC01-B FPGA register map (2017-11-21 ver.)
+ * @brief    MME-ADC01-B FPGA register map (2018-11-14 ver.)
  *
  * @note     updated for LLRF.
  *
@@ -43,7 +43,7 @@
 #define  N_MMEADC01B_DAC_CH        (N_MMEADC01B_DAC_DEV * N_MMEADC01B_DAC_DEV_CH) /* total # of DAC channels */
 
 /*  - data channels           */
-#define  ADC_CH_1                                         0 /* ADC channels */
+#define  ADC_CH_1                                         0  /* ADC channels */
 #define  ADC_CH_2                                         1
 #define  ADC_CH_3                                         2
 #define  ADC_CH_4                                         3
@@ -53,7 +53,7 @@
 #define  ADC_CH_8                                         7
 #define  ADC_CH_9                                         8
 #define  ADC_CH_10                                        9
-#define  DDC_CH_IQ_1                                     10 /* DDC channels */
+#define  DDC_CH_IQ_1                                     10  /* DDC channels */
 #define  DDC_CH_IQ_2                                     11
 #define  DDC_CH_IQ_3                                     12
 #define  DDC_CH_IQ_4                                     13
@@ -63,12 +63,12 @@
 #define  DDC_CH_IQ_8                                     17
 #define  DDC_CH_IQ_9                                     18
 #define  DDC_CH_IQ_10                                    19
-#define  DDC_CH_IQ_11                                    20
-#define  DDC_CH_IQ_12                                    21
-#define  DDC_CH_IQ_13                                    22
-#define  DDC_CH_IQ_14                                    23
-#define  DDC_CH_IQ_15                                    24
-#define  DDC_CH_IQ_16                                    25
+#define  DDC_CH_IQ_11                                    20 /* 10. MON_CAV_IIR */
+#define  DDC_CH_IQ_12                                    21 /* 11. MON_CAV_MV  */
+#define  DDC_CH_IQ_13                                    22 /* 12. MON_KLY_IIR */
+#define  DDC_CH_IQ_14                                    23 /* 13. MON_KLY_MV  */
+#define  DDC_CH_IQ_15                                    24 /* 14. MON_MV      */
+#define  DDC_CH_IQ_16                                    25 /* 15. MON_FF_SV   */
 #define  N_MMEADC01B_CH                                  26 /* total # of channels on MME-ADC01-B */
 
 #define  N_ADC_CH                                        10 /* ADC: 5 devices x 2 ch      */
@@ -146,7 +146,9 @@
 #define  INT_SRC_DDC                                   BIT1
 #define  INT_SRC_ADC                                   BIT0
 
-#define  INT_SRC_ACQ                           (INT_SRC_DDC | INT_SRC_ADC)
+#define  INT_SRC_ACQ                           (INT_SRC_ADC | INT_SRC_DDC)
+#define  INT_SRC_WFM                           (INT_SRC_ADC | INT_SRC_DDC)                                                          /* waveforms (ADC + I/Q + SP)            */
+#define  INT_SRC_MISC                          (INT_SRC_ADC | INT_SRC_DDC)                                                          /* waveforms + CAL Tone + BPM[12] COD SA */
 
 /* register map */
 /* ************************************************************: BAR 0 */
@@ -186,7 +188,8 @@
 #define  MMEADC01B_REG_DO                        0x0000D024              /* DO                */
 #define  MMEADC01B_REG_OEN                       0x0000D028              /* OEN               */
 #define  MMEADC01B_REG_DI_INV                    0x0000D02C              /* DI_INV            */
-#define  MMEADC01B_REG_DO_TESTMODE               0x0000D02C              /* DO_TESTMODE       */
+#define  MMEADC01B_REG_DO_MODE0                  0x0000D030              /* DO_MODE0          */
+#define  MMEADC01B_REG_DO_MODE1                  0x0000D034              /* DO_MODE1          */
 
 /*  BAR 0: trigger counter */
 #define  MMEADC01B_REG_TRIGCNT_INIT              0x0000D040              /* TRIGCNT_INIT      */
@@ -214,9 +217,13 @@
 #define  MMEADC01B_REG_DAC_PAT_REPEAT            0x0000D0A0              /* DAC_PAT_REPEAT     */
 #define  MMEADC01B_REG_DAC_PAT_DEPTH             0x0000D0A4              /* DAC_PAT_DEPTH      */
 #define  MMEADC01B_REG_DAC_PAT_UPD               0x0000D0A8              /* DAC_PAT_UPD        */
-#define  MMEADC01B_REG_DAC_OUT_ROT_A             0x0000D0B0              /* DAC_OUT_ROT_A      */
-#define  MMEADC01B_REG_DAC_OUT_ROT_B             0x0000D0B4              /* DAC_OUT_ROT_B      */
-#define  MMEADC01B_REG_DAC_OUT_ROT_C             0x0000D0B8              /* DAC_OUT_ROT_C      */
+
+#define  MMEADC01B_REG_DAC_OUT_ROT_GAIN          0x0000D0B0              /* DAC_OUT_ROT_GAIN   */
+#define  MMEADC01B_REG_DAC_OUT_ROT_THETA         0x0000D0B4              /* DAC_OUT_ROT_THETA  */
+
+#define  MMEADC01B_DAC_OUT_ROT_GAIN_LSB              0x1000              /*  LSB = 2^12        */
+#define  MMEADC01B_DAC_OUT_ROT_THETA_LSB             0x8000              /*  LSB = 2^15        */
+
 #define  MMEADC01B_REG_DAC_OUT_LIMIT             0x0000D0BC              /* DAC_OUT_LIMIT      */
 #define  MMEADC01B_REG_DAC_OUT_OFS               0x0000D0C0              /* DAC_OUT_OFS        */
 #define  MMEADC01B_REG_DAC_OUT_STEP              0x0000D0C4              /* DAC_OUT_STEP       */
@@ -249,6 +256,7 @@
 
 #define  MMEADC01B_REG_JESD204B_RST              0x0000E080              /* JESD204B_RST       */
 #define  MMEADC01B_REG_GTX_RST                   0x0000E084              /* GTX_RST            */
+#define  MMEADC01B_REG_SHOW_WF_LIMIT             0x0000E088              /* SHOW_WF_LIMIT      */
 
 /*  BAR 0: for debug purpose */
 /*
@@ -282,7 +290,7 @@
 #define  N_MMEADC01B_SW_CONFIG_REG_0                      0
 #define  N_MMEADC01B_SW_CONFIG_REGS                       1
 
-#define  N_MMEADC01B_REG_SW_CONFIG(id_swconf)   (MMEADC01B_REG_SW_CONFIG_0 * ((id_swconf) * 4)
+#define  N_MMEADC01B_REG_SW_CONFIG(id_swconf)   (MMEADC01B_REG_SW_CONFIG_0 + ((id_swconf) * 4))
 
 /*  BAR 0: waveform acquisition */
 #define  MMEADC01B_REG_ADC_REC_START             0x0000F000              /* ADC_REC_START/SRAM */
@@ -375,36 +383,61 @@
 
 #define  MMEADC01B_REG_MON_IQ(ch)               (MMEADC01B_REG_MON_IQ01 + ((ch) * 4))
 
+/*  BAR 0: waveform > ADC peak hold (abs) */
+#define  MMEADC01B_REG_PEAKHOLD_ADC01            0x0000F100              /* PEAKHOLD_ADC01     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC02            0x0000F104              /* PEAKHOLD_ADC02     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC03            0x0000F108              /* PEAKHOLD_ADC03     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC04            0x0000F10C              /* PEAKHOLD_ADC04     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC05            0x0000F110              /* PEAKHOLD_ADC05     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC06            0x0000F114              /* PEAKHOLD_ADC06     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC07            0x0000F118              /* PEAKHOLD_ADC07     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC08            0x0000F11C              /* PEAKHOLD_ADC08     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC09            0x0000F120              /* PEAKHOLD_ADC09     */
+#define  MMEADC01B_REG_PEAKHOLD_ADC10            0x0000F124              /* PEAKHOLD_ADC10     */
+
+#define  MMEADC01B_REG_PEAKHOLD_ADC(ch)         (MMEADC01B_REG_PEAKHOLD_ADC01 + ((ch) * 4))
+
+/*  BAR 0: waveform > comparison > trigger select */
+#define  MMEADC01B_REG_FORM_SOFTTRIG             0x0000F130              /* FORM_SOFTTRIG      */
+#define  MMEADC01B_REG_FORM_EXTTRIG              0x0000F134              /* FORM_EXTTRIG       */
+#define  MMEADC01B_REG_FORM_SELFTRIG_EN          0x0000F138              /* FORM_SELFTRIG_EN   */
+
+/*  BAR 0: waveform > comparison > control */
+#define  MMEADC01B_REG_FORM_PAT_STEP             0x0000F140              /* FORM_PAT_STEP      */
+#define  MMEADC01B_REG_FORM_PAT_DELAY            0x0000F144              /* FORM_PAT_DELAY     */
+#define  MMEADC01B_REG_FORM_PAT_REPEAT           0x0000F148              /* FORM_PAT_REPEAT    */
+#define  MMEADC01B_REG_FORM_PAT_DEPTH            0x0000F14C              /* FORM_PAT_DEPTH     */
+
 /* ************************************************************: BAR 2 */
 #define  LEN_MMEADC01B_BAR_2                       (2 << 20)             /* BAR 2:   2 [MB]    */
 /*   BAR 2: SRAM memory map */
-# define  MMEADC01B_REG_ADC_1                    0x00000000              /* ADC_0     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_2                    0x00010000              /* ADC_1     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_3                    0x00020000              /* ADC_2     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_4                    0x00030000              /* ADC_3     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_5                    0x00040000              /* ADC_4     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_6                    0x00050000              /* ADC_5     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_7                    0x00060000              /* ADC_6     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_8                    0x00070000              /* ADC_7     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_9                    0x00080000              /* ADC_8     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_ADC_10                   0x00090000              /* ADC_9     [31-16]:ADC, [15:0]:fixed 0  */
-# define  MMEADC01B_REG_DAC_2_1                  0x000A0000              /* DAC_1_0   [31-16]:ch2, [15:0]:ch1      */
-# define  MMEADC01B_REG_DDC_IQ_1                 0x000C0000              /* DDC_IQ_0  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_2                 0x000C4000              /* DDC_IQ_1  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_3                 0x000C8000              /* DDC_IQ_2  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_4                 0x000CC000              /* DDC_IQ_3  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_5                 0x000D0000              /* DDC_IQ_4  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_6                 0x000D4000              /* DDC_IQ_5  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_7                 0x000D8000              /* DDC_IQ_6  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_8                 0x000DC000              /* DDC_IQ_7  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_9                 0x000E0000              /* DDC_IQ_4  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_10                0x000E4000              /* DDC_IQ_5  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_11                0x000E8000              /* DDC_IQ_6  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_12                0x000EC000              /* DDC_IQ_7  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_13                0x000F0000              /* DDC_IQ_4  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_14                0x000F4000              /* DDC_IQ_5  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_15                0x000F8000              /* DDC_IQ_6  [31-16]:Q  , [15:0]:I        */
-# define  MMEADC01B_REG_DDC_IQ_16                0x000FC000              /* DDC_IQ_7  [31-16]:Q  , [15:0]:I        */
+#define  MMEADC01B_REG_ADC_1                     0x00000000              /* ADC_0     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_2                     0x00010000              /* ADC_1     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_3                     0x00020000              /* ADC_2     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_4                     0x00030000              /* ADC_3     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_5                     0x00040000              /* ADC_4     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_6                     0x00050000              /* ADC_5     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_7                     0x00060000              /* ADC_6     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_8                     0x00070000              /* ADC_7     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_9                     0x00080000              /* ADC_8     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_ADC_10                    0x00090000              /* ADC_9     [31-16]:fixed 0, [15:0]:ADC    */
+#define  MMEADC01B_REG_DAC_2_1                   0x000A0000              /* DAC_1_0   [31-16]:theta  , [15:0]:R      */
+#define  MMEADC01B_REG_DDC_IQ_1                  0x000C0000              /* DDC_IQ_0  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_2                  0x000C4000              /* DDC_IQ_1  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_3                  0x000C8000              /* DDC_IQ_2  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_4                  0x000CC000              /* DDC_IQ_3  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_5                  0x000D0000              /* DDC_IQ_4  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_6                  0x000D4000              /* DDC_IQ_5  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_7                  0x000D8000              /* DDC_IQ_6  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_8                  0x000DC000              /* DDC_IQ_7  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_9                  0x000E0000              /* DDC_IQ_4  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_10                 0x000E4000              /* DDC_IQ_5  [31-16]:Q      , [15:0]:I      */
+#define  MMEADC01B_REG_DDC_IQ_11                 0x000E8000              /* DDC_IQ_6  [31-16]:theta  , [15:0]:R      */ /* MON_CAV_IIR */
+#define  MMEADC01B_REG_DDC_IQ_12                 0x000EC000              /* DDC_IQ_7  [31-16]:theta  , [15:0]:R      */ /* MON_CAV_MV  */
+#define  MMEADC01B_REG_DDC_IQ_13                 0x000F0000              /* DDC_IQ_4  [31-16]:theta  , [15:0]:R      */ /* MON_KLY_IIR */
+#define  MMEADC01B_REG_DDC_IQ_14                 0x000F4000              /* DDC_IQ_5  [31-16]:theta  , [15:0]:R      */ /* MON_KLY_MV  */
+#define  MMEADC01B_REG_DDC_IQ_15                 0x000F8000              /* DDC_IQ_6  [31-16]:Q      , [15:0]:I      */ /* MON_MV      */
+#define  MMEADC01B_REG_DDC_IQ_16                 0x000FC000              /* DDC_IQ_7  [31-16]:theta  , [15:0]:R      */ /* MON_FF_SV   */
 
 #define  MMEADC01B_REG_SRAM_ADC(   ch)   (MMEADC01B_REG_ADC_1    + (LEN_ADC_DAT * (ch)))
 #define  MMEADC01B_REG_SRAM_DAC(   ch)   (MMEADC01B_REG_DAC_2_1  + (LEN_DAC_DAT * (ch)))
@@ -412,27 +445,30 @@
 
 /* ************************************************************: BAR 4: added for LLRF */
 #define  LEN_MMEADC01B_BAR_4                     (128 << 10)             /* BAR 4: 128 [kB]    */
-/*  BAR 4: I/Q modualtion coefficients */
-#define  MMEADC01B_REG_N_IQMOD_COEFF             0x00000000              /* N_IQMOD_COEFF      */
-#define  MMEADC01B_REG_IQMOD_COEFF_0             0x00000004              /* IQMOD_COEFF_0      */
-#define  MMEADC01B_REG_IQMOD_COEFF_1             0x00000008              /* IQMOD_COEFF_1      */
-#define  MMEADC01B_REG_IQMOD_COEFF_2             0x0000000C              /* IQMOD_COEFF_2      */
-#define  MMEADC01B_REG_IQMOD_COEFF_3             0x00000010              /* IQMOD_COEFF_3      */
-#define  MMEADC01B_REG_IQMOD_COEFF_4             0x00000014              /* IQMOD_COEFF_4      */
-#define  MMEADC01B_REG_IQMOD_COEFF_5             0x00000018              /* IQMOD_COEFF_5      */
-#define  MMEADC01B_REG_IQMOD_COEFF_6             0x0000001C              /* IQMOD_COEFF_6      */
-#define  MMEADC01B_REG_IQMOD_COEFF_7             0x00000020              /* IQMOD_COEFF_7      */
-#define  MMEADC01B_REG_IQMOD_COEFF_8             0x00000024              /* IQMOD_COEFF_8      */
-#define  MMEADC01B_REG_IQMOD_COEFF_9             0x00000028              /* IQMOD_COEFF_9      */
-#define  MMEADC01B_REG_IQMOD_COEFF_A             0x0000002C              /* IQMOD_COEFF_A      */
-#define  MMEADC01B_REG_IQMOD_COEFF_B             0x00000030              /* IQMOD_COEFF_B      */
-#define  MMEADC01B_REG_IQMOD_COEFF_C             0x00000034              /* IQMOD_COEFF_C      */
-#define  MMEADC01B_REG_IQMOD_COEFF_D             0x00000038              /* IQMOD_COEFF_D      */
-#define  MMEADC01B_REG_IQMOD_COEFF_E             0x0000003C              /* IQMOD_COEFF_E      */
-#define  MMEADC01B_REG_IQMOD_COEFF_F             0x00000040              /* IQMOD_COEFF_F      */
+/*  BAR 4: DDC coefficients */
+#define  MMEADC01B_REG_N_DDC_COEFF               0x00000000              /* N_DDC_COEFF        */
+#define  MMEADC01B_REG_DDC_COEFF_0               0x00000004              /* DDC_COEFF_0        */
+#define  MMEADC01B_REG_DDC_COEFF_1               0x00000008              /* DDC_COEFF_1        */
+#define  MMEADC01B_REG_DDC_COEFF_2               0x0000000C              /* DDC_COEFF_2        */
+#define  MMEADC01B_REG_DDC_COEFF_3               0x00000010              /* DDC_COEFF_3        */
+#define  MMEADC01B_REG_DDC_COEFF_4               0x00000014              /* DDC_COEFF_4        */
+#define  MMEADC01B_REG_DDC_COEFF_5               0x00000018              /* DDC_COEFF_5        */
+#define  MMEADC01B_REG_DDC_COEFF_6               0x0000001C              /* DDC_COEFF_6        */
+#define  MMEADC01B_REG_DDC_COEFF_7               0x00000020              /* DDC_COEFF_7        */
+#define  MMEADC01B_REG_DDC_COEFF_8               0x00000024              /* DDC_COEFF_8        */
+#define  MMEADC01B_REG_DDC_COEFF_9               0x00000028              /* DDC_COEFF_9        */
+#define  MMEADC01B_REG_DDC_COEFF_A               0x0000002C              /* DDC_COEFF_A        */
+#define  MMEADC01B_REG_DDC_COEFF_B               0x00000030              /* DDC_COEFF_B        */
+#define  MMEADC01B_REG_DDC_COEFF_C               0x00000034              /* DDC_COEFF_C        */
+#define  MMEADC01B_REG_DDC_COEFF_D               0x00000038              /* DDC_COEFF_D        */
+#define  MMEADC01B_REG_DDC_COEFF_E               0x0000003C              /* DDC_COEFF_E        */
+#define  MMEADC01B_REG_DDC_COEFF_F               0x00000040              /* DDC_COEFF_F        */
 
-#define  N_MMEADC01B_IQMOD_COEFF                     0x0F
-#define  MMEADC01B_REG_IQMOD_COEFF(id_coeff)    (MMEADC01B_REG_IQMOD_COEFF_0 + ((id_coeff) * 4))
+#define  N_MMEADC01B_DDC_COEFF                         0x0F
+#define  MMEADC01B_REG_DDC_COEFF(id_coeff)      (MMEADC01B_REG_DDC_COEFF_0 + ((id_coeff) * 4))
+
+#define  MMEADC01B_DDC_THRU                      0x00000044              /* DDC_THRU           */
+#define  MMEADC01B_DDC_EXT_SYNC_EN               0x00000048              /* DDC_EXT_SYNC_EN    */
 
 /*  BAR 4: I/Q rotation, gain coefficients */
 /*
@@ -446,9 +482,14 @@
  *        B = <gain> x -sinθ
  *        C = <gain> x  sinθ
  */
-#define  MMEADC01B_REG_ADC_ROT_COEFF_A(ch)      (0x00000050 + ((ch) * 4)) /* ADC_ROT_COEFF_A(ch) */
-#define  MMEADC01B_REG_ADC_ROT_COEFF_B(ch)      (0x00000078 + ((ch) * 4)) /* ADC_ROT_COEFF_B(ch) */
-#define  MMEADC01B_REG_ADC_ROT_COEFF_C(ch)      (0x000000A0 + ((ch) * 4)) /* ADC_ROT_COEFF_C(ch) */
+#define  MMEADC01B_REG_IQ_ROT_COEFF_A(ch)       (0x00000050 + ((ch) * 4)) /* IQ_ROT_COEFF_A(ch) */
+#define  MMEADC01B_REG_IQ_ROT_COEFF_B(ch)       (0x00000078 + ((ch) * 4)) /* IQ_ROT_COEFF_B(ch) */
+#define  MMEADC01B_REG_IQ_ROT_COEFF_C(ch)       (0x000000A0 + ((ch) * 4)) /* IQ_ROT_COEFF_C(ch) */
+
+#define  N_MMEADC01B_IQ_ROT_COEFF_CH                     10              /* # of iq rot ch     */
+#define  MIN_MMEADC01B_REG_IQ_ROT_COEFF                  -8.0
+#define  MAX_MMEADC01B_REG_IQ_ROT_COEFF                   8.0
+#define  MMEADC01B_IQ_ROT_COEFF_LSB                  0x4000
 
 /*  BAR 4: vector sum */
 #define  MMEADC01B_REG_VECTSUM_CAV_FB            0x000000D0              /* VECTSUM_CAV_FB     */
@@ -482,10 +523,11 @@
  * INTL_SRC_2:
  *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
  *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- *   +-----------------------+-------------------+-------------------+
- *   |     (_Reserved_)      |        I/Q        |        ADC        |
- *   +-----------------------+-------------------+-------------------+
- *             bit 31-20: (_Reserved_)
+ *   +---+-------------------+-------------------+-------------------+
+ *   |(R)|       FORM        |        I/Q        |        ADC        |
+ *   +---+-------------------+-------------------+-------------------+
+ *             bit 31-30: (_Reserved_)
+ *             bit 29-20: Wavefrom Limit      (I/Q ch 10-1)
  *             bit 19-10: ADC                 (ADC ch 10-1)
  *             bit  9-0 : I/Q                 (I/Q ch 10-1)
  */
@@ -595,82 +637,82 @@
 #define  MMEADC01B_REG_FIR_COEFF_14              0x00001088              /* FIR_COEFF_14       */
 #define  MMEADC01B_REG_FIR_COEFF_15              0x0000108C              /* FIR_COEFF_15       */
 #define  MMEADC01B_REG_FIR_COEFF_16              0x00001090              /* FIR_COEFF_16       */
-#define  MMEADC01B_REG_FIR_COEFF_17              0x00001094              /* FIR_COEFF_17       */
-#define  MMEADC01B_REG_FIR_COEFF_18              0x00001098              /* FIR_COEFF_18       */
-#define  MMEADC01B_REG_FIR_COEFF_19              0x0000109C              /* FIR_COEFF_19       */
-#define  MMEADC01B_REG_FIR_COEFF_20              0x000010A0              /* FIR_COEFF_20       */
-#define  MMEADC01B_REG_FIR_COEFF_21              0x000010A4              /* FIR_COEFF_21       */
-#define  MMEADC01B_REG_FIR_COEFF_22              0x000010A8              /* FIR_COEFF_22       */
-#define  MMEADC01B_REG_FIR_COEFF_23              0x000010AC              /* FIR_COEFF_23       */
-#define  MMEADC01B_REG_FIR_COEFF_24              0x000010B0              /* FIR_COEFF_24       */
-#define  MMEADC01B_REG_FIR_COEFF_25              0x000010B4              /* FIR_COEFF_25       */
-#define  MMEADC01B_REG_FIR_COEFF_26              0x000010B8              /* FIR_COEFF_26       */
-#define  MMEADC01B_REG_FIR_COEFF_27              0x000010BC              /* FIR_COEFF_27       */
-#define  MMEADC01B_REG_FIR_COEFF_28              0x000010C0              /* FIR_COEFF_28       */
-#define  MMEADC01B_REG_FIR_COEFF_29              0x000010C4              /* FIR_COEFF_29       */
-#define  MMEADC01B_REG_FIR_COEFF_30              0x000010C8              /* FIR_COEFF_30       */
-#define  MMEADC01B_REG_FIR_COEFF_31              0x000010CC              /* FIR_COEFF_31       */
 
+#define  N_MMEADC01B_REG_FIR_COEFFS                      16
 #define  MMEADC01B_REG_FIR_COEFF(id_coeff)      (MMEADC01B_REG_FIR_COEFF_0 + ((id_coeff) * 4))
 
-/*  BAR 4: I/Q CIC filter coefficients */
-#define  MMEADC01B_REG_CIC_DECIM_RATE_UPD        0x000010E0              /* CIC_DECIM_RATE_UPD */
-#define  MMEADC01B_REG_CIC_DECIM_RATE            0x000010E4              /* CIC_DECIM_RATE     */
+/*  BAR 4: FIR filter coefficients for feedback of coherent synchrotron oscillation */
+#define  MMEADC01B_REG_FSFB_FIR_ON               0x000010A0              /* FSFB_FIR_ON        */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_UPD        0x000010A8              /* FSFB_FIR_COEFF_UPD */
+
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_00         0x000010B0              /* FSFB_FIR_COEFF_00  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_01         0x000010B4              /* FSFB_FIR_COEFF_01  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_02         0x000010B8              /* FSFB_FIR_COEFF_02  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_03         0x000010BC              /* FSFB_FIR_COEFF_03  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_04         0x000010C0              /* FSFB_FIR_COEFF_04  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_05         0x000010C4              /* FSFB_FIR_COEFF_05  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_06         0x000010C8              /* FSFB_FIR_COEFF_06  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_07         0x000010CC              /* FSFB_FIR_COEFF_07  */
+#define  MMEADC01B_REG_FSFB_FIR_COEFF_08         0x000010D0              /* FSFB_FIR_COEFF_08  */
+
+#define  N_MMEADC01B_REG_FSFB_FIR_COEFFS                 10
+#define  MMEADC01B_REG_FSFB_FIR_COEFF(id_coeff) (MMEADC01B_REG_FSFB_FIR_COEFF_00 + ((id_coeff) * 4))
+
+/*  BAR 4: I/Q IIR filter coefficients */
+#define  MMEADC01B_REG_IIR_ON                    0x000010E0              /* IIR_ON             */
+#define  MMEADC01B_REG_IIR_COEFF                 0x000010E4              /* IIR_COEFF          */
+
+/*  BAR 4: CIC filter coefficients for feedback of coherent synchrotron oscillation */
+#define  MMEADC01B_REG_FSFB_CIC_RATE_UPD         0x000010F0              /* FSFB_CIC_RATE_UPD  */
+#define  MMEADC01B_REG_FSFB_CIC_RATE             0x000010F4              /* FSFB_CIC_RATE      */
 
 /*  BAR 4: feedback control */
-#define  MMEADC01B_REG_IIR_COEFF_CAV             0x00002000              /* IIR_COEFF_CAV      */
-#define  MMEADC01B_REG_IIR_COEFF_KLY             0x00002004              /* IIR_COEFF_KLY      */
-#define  MMEADC01B_REG_IIR_ON_CAV                0x00002008              /* IIR_ON_CAV         */
-#define  MMEADC01B_REG_IIR_ON_KLY                0x0000200C              /* IIR_ON_KLY         */
-#define  MMEADC01B_REG_REF_IQ_CAV                0x00002010              /* REF_IQ_CAV         */
-#define  MMEADC01B_REG_SV_CONST                  0x00002014              /* SV_CONST           */
-#define  MMEADC01B_REG_SV_SW                     0x00002018              /* SV_SW              */
+#define  MMEADC01B_REG_CAV_IIR_COEFF             0x00002000              /* CAV_IIR_COEFF      */
+#define  MMEADC01B_REG_CAV_IIR_COEFF_T           0x00002004              /* CAV_IIR_COEFF_T    */
+#define  MMEADC01B_REG_KLY_IIR_COEFF             0x00002008              /* KLY_IIR_COEFF      */
+#define  MMEADC01B_REG_KLY_IIR_COEFF_T           0x0000200C              /* KLY_IIR_COEFF_T    */
+#define  MMEADC01B_REG_CAV_SV                    0x00002010              /* CAV_SV             */
+#define  MMEADC01B_REG_KLY_SV                    0x00002014              /* KLY_SV             */
+#define  MMEADC01B_REG_KLY_SV_SEL                0x00002018              /* KLY_SV_SEL         */
 #define  MMEADC01B_REG_FB_ON                     0x0000201C              /* FB_ON              */
-#define  MMEADC01B_REG_P_GAIN_I_KLY              0x00002020              /* P_GAIN_I_KLY       */
-#define  MMEADC01B_REG_P_GAIN_Q_KLY              0x00002024              /* P_GAIN_Q_KLY       */
-#define  MMEADC01B_REG_I_GAIN_I_KLY              0x00002028              /* I_GAIN_I_KLY       */
-#define  MMEADC01B_REG_I_GAIN_Q_KLY              0x0000202C              /* I_GAIN_Q_KLY       */
-#define  MMEADC01B_REG_P_GAIN_I_CAV              0x00002030              /* P_GAIN_I_CAV       */
-#define  MMEADC01B_REG_P_GAIN_Q_CAV              0x00002034              /* P_GAIN_Q_CAV       */
-#define  MMEADC01B_REG_I_GAIN_I_CAV              0x00002038              /* I_GAIN_I_CAV       */
-#define  MMEADC01B_REG_I_GAIN_Q_CAV              0x0000203C              /* I_GAIN_Q_CAV       */
-#define  MMEADC01B_REG_FF_BASE                   0x00002040              /* FF_BASE            */
-#define  MMEADC01B_REG_FF_BASE_FACT              0x00002044              /* FF_BASE_FACT       */
-#define  MMEADC01B_REG_FF_NCO_FREQ_ST            0x00002048              /* FF_NCO_FREQ_ST     */
-#define  MMEADC01B_REG_FF_NCO_FREQ_ED            0x0000204C              /* FF_NCO_FREQ_ED     */
-#define  MMEADC01B_REG_FF_NCO_INC_RATE           0x00002050              /* FF_NCO_INC_RATE    */
-#define  MMEADC01B_REG_FF_NCO_RST                0x00002054              /* FF_NCO_RST         */
-#define  MMEADC01B_REG_PLL_ON_KLY                0x00002058              /* PLL_ON_KLY         */
-#define  MMEADC01B_REG_THOLD_DLT_Q               0x0000205C              /* THOLD_DLT_Q        */
-#define  MMEADC01B_REG_THETA_CYC                 0x00002060              /* THETA_CYC          */
-#define  MMEADC01B_REG_THETA_STEP                0x00002064              /* THETA_STEP         */
-#define  MMEADC01B_REG_THETA_DIR                 0x00002068              /* THETA_DIR          */
-#define  MMEADC01B_REG_SMON_THETA                0x0000206C              /* SMON_THETA         */
-#define  MMEADC01B_REG_SMON_DLT_Q                0x00002070              /* SMON_DLT_Q         */
-#define  MMEADC01B_REG_SMON_PLL_KLY              0x00002074              /* SMON_PLL_KLY       */
-#define  MMEADC01B_REG_PLL_RST_KLY               0x00002078              /* PLL_RST_KLY        */
-#define  MMEADC01B_REG_PLL_LL_KLY                0x0000207C              /* PLL_LL_KLY         */
-#define  MMEADC01B_REG_SMON_PLL_IQ_KLY           0x00002080              /* SMON_PLL_IQ_KLY    */
-#define  MMEADC01B_REG_SMON_THOLD                0x00002084              /* SMON_THOLD         */
-#define  MMEADC01B_REG_KLY_CAL_ROT_A             0x00002088              /* KLY_CAL_ROT_A      */
-#define  MMEADC01B_REG_KLY_CAL_ROT_B             0x0000208C              /* KLY_CAL_ROT_B      */
-#define  MMEADC01B_REG_KLY_CAL_ROT_V             0x00002090              /* KLY_CAL_ROT_V      */
+#define  MMEADC01B_REG_KLY_P_GAIN_R              0x00002020              /* KLY_P_GAIN_R       */
+#define  MMEADC01B_REG_KLY_P_GAIN_T              0x00002024              /* KLY_P_GAIN_T       */
+#define  MMEADC01B_REG_KLY_I_GAIN_R              0x00002028              /* KLY_I_GAIN_R       */
+#define  MMEADC01B_REG_KLY_I_GAIN_T              0x0000202C              /* KLY_I_GAIN_T       */
+#define  MMEADC01B_REG_CAV_P_GAIN_R              0x00002030              /* CAV_P_GAIN_R       */
+#define  MMEADC01B_REG_CAV_P_GAIN_T              0x00002034              /* CAV_P_GAIN_T       */
+#define  MMEADC01B_REG_CAV_I_GAIN_R              0x00002038              /* CAV_I_GAIN_R       */
+#define  MMEADC01B_REG_CAV_I_GAIN_T              0x0000203C              /* CAV_I_GAIN_T       */
+#define  MMEADC01B_REG_FF_SV                     0x00002040              /* FF_SV              */
+#define  MMEADC01B_REG_FF_GAIN                   0x00002044              /* FF_GAIN            */
+#define  MMEADC01B_REG_FF_NCO_FREQ_START         0x00002048              /* FF_NCO_FREQ_START  */
+#define  MMEADC01B_REG_FF_NCO_FREQ_STOP          0x0000204C              /* FF_NCO_FREQ_STOP   */
+#define  MMEADC01B_REG_FF_NCO_INC_FREQ           0x00002050              /* FF_NCO_INC_FREQ    */
+#define  MMEADC01B_REG_FF_NCO_INC_CYCLE          0x00002054              /* FF_NCO_INC_CYCLE   */
+#define  MMEADC01B_REG_FF_NCO_RST_REPEAT         0x00002058              /* FF_NCO_RST_REPEAT  */
+
+#define  MMEADC01B_REG_FSFB_SFP_ADC_SEL          0x00002070              /* FSFB_SFP_ADC_SEL   */
+#define  MMEADC01B_REG_FSFB_GAIN                 0x00002074              /* FSFB_GAIN          */
+#define  MMEADC01B_REG_FSFB_LIMIT                0x00002078              /* FSFB_LIMIT         */
+
 #define  MMEADC01B_REG_MV_CONST                  0x00002094              /* MV_CONST           */
-#define  MMEADC01B_REG_MC_SW                     0x00002098              /* MC_SW              */
+#define  MMEADC01B_REG_MV_SEL                    0x00002098              /* MV_SEL             */
+
+#define  MMEADC01B_REG_PI_STEP                   0x000020A4              /* PI_STEP            */
 
 /*  BAR 4: real-time monitor */
-#define  MMEADC01B_REG_MON_IIR_CAV               0x00002100              /* MON_IIR_CAV        */
-#define  MMEADC01B_REG_MON_IIR_KLY               0x00002104              /* MON_IIR_KLY        */
-#define  MMEADC01B_REG_MON_PRE_PI_KLY            0x00002108              /* MON_PRE_PI_KLY     */
-#define  MMEADC01B_REG_MON_POST_PI_KLY           0x0000210C              /* MON_POST_PI_KLY    */
-#define  MMEADC01B_REG_MON_PRE_PI_CAV            0x00002110              /* MON_PRE_PI_CAV     */
-#define  MMEADC01B_REG_MON_POST_PI_CAV           0x00002114              /* MON_POST_PI_CAV    */
-#define  MMEADC01B_REG_MON_SV                    0x00002118              /* MON_SV             */
-#define  MMEADC01B_REG_MON_FF                    0x0000211C              /* MON_FF             */
-#define  MMEADC01B_REG_MON_DAC_ROT               0x00002120              /* MON_DAC_ROT        */
-#define  MMEADC01B_REG_MON_RFSW                  0x00002124              /* MON_RFSW           */
-#define  MMEADC01B_REG_MON_DAC_LIMIT             0x00002128              /* MON_DAC_LIMIT      */
-#define  MMEADC01B_REG_MON_DAC_OFS               0x0000212C              /* MON_DAC_OFS        */
-#define  MMEADC01B_REG_MON_MV                    0x00002130              /* MON_MV             */
+#define  MMEADC01B_REG_MON_CAV_IIR               0x00002100              /* CAV_IIR            */
+#define  MMEADC01B_REG_MON_KLY_IIR               0x00002104              /* KLY_IIR            */
+#define  MMEADC01B_REG_MON_KLY_ERR               0x00002108              /* KLY_ERR            */
+#define  MMEADC01B_REG_MON_KLY_PI_DIFF           0x0000210C              /* KLY_PI_DIFF        */
+#define  MMEADC01B_REG_MON_CAV_ERR               0x00002110              /* CAV_ERR            */
+#define  MMEADC01B_REG_MON_CAV_PI_DIFF           0x00002114              /* CAV_PI_DIFF        */
+#define  MMEADC01B_REG_MON_CAV_MV                0x00002118              /* CAV_MV             */
+#define  MMEADC01B_REG_MON_FF_SV                 0x0000211C              /* FF_SV              */
+#define  MMEADC01B_REG_MON_MV_ROT                0x00002120              /* MV_ROT             */
+#define  MMEADC01B_REG_MON_MV_RFSW               0x00002124              /* MV_RFSW            */
+#define  MMEADC01B_REG_MON_MV_LIMIT              0x00002128              /* MV_LIMIT           */
+#define  MMEADC01B_REG_MON_MV                    0x0000212C              /* MV                 */
+#define  MMEADC01B_REG_MON_KLY_MV                0x00002130              /* KLY_MV             */
 
 #endif  /* MMEADC01B_REGS_H */

@@ -13,14 +13,14 @@
 #include <sys/ioctl.h>                   /* ioctl()     */
 #include <sys/time.h>                    /* timeval     */
 
-#include "../mmeadc01b/mmeadc01b_defs.h" /* IOCTL cmd   */
-#include "./dev_api_mmeadc01b.h"         /* own library */
+#include "mmeadc01b_defs.h"              /* IOCTL cmd   */
+#include "dev_api_mmeadc01b.h"           /* own library */
 
 /**
  * dev_mmeadc01b_adc_write()
  * @brief    write data to   ADC registers
  *
- * @param    [in]   id               int  ::= file descriptor of the MME-ADC01-B
+ * @param    [in]   fd               int  ::= file descriptor of the MME-ADC01-B
  * @param    [in]   id_adc           int  ::= device ID of ADC
  * @param    [in]   addr             int  ::= ADC register address to start to write
  * @param    [in]   num              int  ::= # of ADC registers to be written

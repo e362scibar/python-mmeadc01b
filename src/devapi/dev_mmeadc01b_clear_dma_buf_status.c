@@ -13,8 +13,8 @@
 #include <sys/ioctl.h>                   /* ioctl()     */
 #include <sys/time.h>                    /* timeval     */
 
-#include "../mmeadc01b/mmeadc01b_defs.h" /* IOCTL cmd   */
-#include "./dev_api_mmeadc01b.h"         /* own library */
+#include "mmeadc01b_defs.h"              /* IOCTL cmd   */
+#include "dev_api_mmeadc01b.h"           /* own library */
 
 /**
  * dev_mmeadc01b_clear_dma_buf_status()

@@ -90,16 +90,29 @@
 #endif
 
 /* I2C */
-#define  I2C_READ                   1 /* I2C communication direction: data from slave device */
-#define  I2C_WRITE                  0 /* I2C communication direction: data to   slave device */
+#define  I2C_READ                          1 /* I2C communication direction: data from slave device */
+#define  I2C_WRITE                         0 /* I2C communication direction: data to   slave device */
 
 /* DMA xfer buffer */
-#define  LEN_DMA_BUF_PER_CH (64 << 10) /* 64 [kB] */
+#define  LEN_DMA_BUF_PER_CH        (64 << 10) /* 64 [kB] */
 
 /* Interrupt sources */
-#define  MMEADC01B_INT_SRC_ACQ      0 /* waveform acq done            */
-#define  MMEADC01B_INT_SRC_INTL     1 /* interlock condition detected */
+#define  MMEADC01B_INT_SRC_ACQ             0 /* waveform acq done            */
+#define  MMEADC01B_INT_SRC_INTL            1 /* interlock condition detected */
 
+/* Rotation Coefficient IDs */
+#define  MMEADC01B_ROT_COEFF_ID_DAC        0 /*  Rot Coeff ID: DAC            */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_1       1 /*  Rot Coeff ID: I/Q ch  1      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_2       2 /*  Rot Coeff ID: I/Q ch  2      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_3       3 /*  Rot Coeff ID: I/Q ch  3      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_4       4 /*  Rot Coeff ID: I/Q ch  4      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_5       5 /*  Rot Coeff ID: I/Q ch  5      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_6       6 /*  Rot Coeff ID: I/Q ch  6      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_7       7 /*  Rot Coeff ID: I/Q ch  7      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_8       8 /*  Rot Coeff ID: I/Q ch  8      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_9       9 /*  Rot Coeff ID: I/Q ch  9      */
+#define  MMEADC01B_ROT_COEFF_ID_IQ_10     10 /*  Rot Coeff ID: I/Q ch 10      */
+#define  N_MMEADC01B_ROT_COEFF_IDS        11 /* # of ratation coefficient IDs */
 
 #endif  /* DEV_API_MMEADC01B_DEFINE_H */
 

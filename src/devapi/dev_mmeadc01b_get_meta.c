@@ -13,15 +13,15 @@
 #include <sys/ioctl.h>                   /* ioctl()     */
 #include <sys/time.h>                    /* timeval     */
 
-#include "../mmeadc01b/mmeadc01b_defs.h" /* IOCTL cmd   */
-#include "./dev_api_mmeadc01b.h"         /* own library */
+#include "mmeadc01b_defs.h"              /* IOCTL cmd   */
+#include "dev_api_mmeadc01b.h"           /* own library */
 
 /**
  * dev_mmeadc01b_get_meta()
  * @brief    get META info for waveform data which DMA xfered.
  *
  * @param    [in]   fd                     int     ::= a file descriptor
- * @param    [out] *meta  mmeadc01b_xfer_meta_t    ::= META info on DMA xfer
+ * @param    [out] *meta  mmeadc01b_xfer_meta_t    ::= META info array on DMA xfer
  * @return          stat                           ::= process status
  */
 int
