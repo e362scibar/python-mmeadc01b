@@ -1,11 +1,12 @@
-MMEADC01B_ERR_BAR     -1402009999  /*    invalid BAR #   */
-MMEADC01B_ERR_ADDR    -1402009998  /*    invalid address */
-MMEADC01B_ERR_RANGE   -1402009997  /*     out of range   */
-MMEADC01B_ERR_FORMAT  -1402009996  /* wrong data format  */
-MMEADC01B_ERR_READ    -1402009995  /*       read error   */
-MMEADC01B_ERR_WRITE   -1402009994  /*      write error   */
-MMEADC01B_ERR_MMAP    -1402009993  /*       mmap error   */
-MMEADC01B_ERR_MUNMAP  -1402009992  /*     munmap error   */
-MMEADC01B_ERR_INVALID -1402009991  /*  something invalid */
-MMEADC01B_ERR_BUSY    -1402009990  /*       busy         */
-MMEADC01B_ERR_TIMEOUT -1402009989  /*      timed out     */
+MMEADC01B_ERR_BAR     -1402000000  /*    invalid BAR #   */
+MMEADC01B_ERR_ADDR    -1402000001  /*    invalid address */
+MMEADC01B_ERR_RANGE   -1402000002  /*     out of range   */
+MMEADC01B_ERR_FORMAT  -1402000003  /* wrong data format  */
+MMEADC01B_ERR_READ    -1402000004  /*       read error   */
+MMEADC01B_ERR_WRITE   -1402000005  /*      write error   */
+MMEADC01B_ERR_MMAP    -1402000006  /*       mmap error   */
+MMEADC01B_ERR_MUNMAP  -1402000007  /*     munmap error   */
+MMEADC01B_ERR_INVALID -1402000008  /*  something invalid */
+MMEADC01B_ERR_BUSY    -1402000009  /*       busy         */
+MMEADC01B_ERR_TIMEOUT -1402000010  /*      timed out     */
+

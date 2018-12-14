@@ -147,6 +147,21 @@ class Device:
         if status:
             raise Error(status)
         return adc, iq
+    def get_ring_status(self):
+        if self.fd is None:
+            raise RuntimeError("Device not opened.")
+        status, cmplt = devapi.get_ring_status(self.fd)
+        if status:
+            raise Error(status)
+        return cmplt
+    def start_dma_xfer(self, idx):
+        if self.fd is None:
+            raise RuntimeError("Device not opened.")
+        req_acq = 1
+        status = devapi.start_dma_xfer(self.fd, req_acq, idx)
+        if status:
+            raise Error(status)
+        return
     def clear_dma_buf_status(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
@@ -192,7 +207,7 @@ class Device:
         self.write(Register("INTR_CLR"), 0)
         self.write(Register("INTR_MASK"), 0)
         self.reset_interrupt_status()
-        self.register_interrupt_callback()
+        # self.register_interrupt_callback()
         self.mmap_dma_buf()
     def wfm_start(self):
         self.reset_interrupt_status()
@@ -205,14 +220,14 @@ class Device:
         self.write(Register("WAVE_SOFTTRG"), 0)
     def wfm_terminate(self):
         self.munmap_dma_buf()
-        self.unregister_interrupt_callback()
+        # self.unregister_interrupt_callback()
     def wfm_get(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmapped.")
-        if not self.get_interrupt_status()[0]:
-            time.sleep(0.1)
-            if not self.get_interrupt_status()[0]:
-                raise TimeoutError("Waveform timeout")
+        #if not self.get_interrupt_status()[0]:
+        #    time.sleep(0.1)
+        #    if not self.get_interrupt_status()[0]:
+        #        raise TimeoutError("Waveform timeout")
         status, adc, iq = devapi.get_waveform(self.dmabuf)
         return adc, iq
     def wfm_enable(self):

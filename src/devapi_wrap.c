@@ -285,6 +285,7 @@ static PyObject* mmeadc01b_mmap_dma_buf(PyObject* self, PyObject* args){
   if(!PyArg_ParseTuple(args, "i", &fd)){
     return NULL;
   }
+  printf("N_DMA_BUF %d\n", N_DMA_BUF);
   status = dev_mmeadc01b_mmap_dma_buf(fd, dbuf);
   return Py_BuildValue("iO", status, set_tuple_ptr(dbuf));
 }
@@ -308,11 +309,34 @@ static PyObject* mmeadc01b_get_meta(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_get_meta(fd, xm);
-  return Py_BuildValue("i{s:i,s:i}{s:i,s:i}", status,
+  return Py_BuildValue("i{s:i,s:i,s:i,s:i}{s:i,s:i,s:i,s:i}", status,
+    "idx_latest", xm[MMEADC01B_META_ID_ADC].idx_latest,
+    "idx_intl", xm[MMEADC01B_META_ID_ADC].idx_intl,
     "wrapped", xm[MMEADC01B_META_ID_ADC].wrapped,
     "npt", xm[MMEADC01B_META_ID_ADC].npt,
+    "idx_latest", xm[MMEADC01B_META_ID_IQ].idx_latest,
+    "idx_intl", xm[MMEADC01B_META_ID_IQ].idx_intl,
     "wrapped", xm[MMEADC01B_META_ID_IQ].wrapped,
     "npt", xm[MMEADC01B_META_ID_IQ].npt);
+}
+
+static PyObject* mmeadc01b_get_ring_status(PyObject* self, PyObject* args){
+  int status, fd;
+  unsigned int cmplt;
+  if(!PyArg_ParseTuple(args, "i", &fd)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_get_ring_status(fd, &cmplt);
+  return Py_BuildValue("ii", status, cmplt);
+}
+
+static PyObject* mmeadc01b_start_dma_xfer(PyObject* self, PyObject* args){
+  int status, fd, req_acq, idx_area;
+  if(!PyArg_ParseTuple(args, "iii", &fd, &req_acq, &idx_area)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_start_dma_xfer(fd, (unsigned int)req_acq, idx_area);
+  return Py_BuildValue("i", status);
 }
 
 static PyObject* mmeadc01b_clear_dma_buf_status(PyObject* self, PyObject* args){
@@ -438,6 +462,8 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"mmap_dma_buf", mmeadc01b_mmap_dma_buf, METH_VARARGS, "Mmap for DMA transfer."},
   {"munmap_dma_buf", mmeadc01b_munmap_dma_buf, METH_VARARGS, "Munmap for DMA transfer."},
   {"get_meta", mmeadc01b_get_meta, METH_VARARGS, "Get metadata."},
+  {"get_ring_status", mmeadc01b_get_ring_status, METH_VARARGS, "Get ring buffer status."},
+  {"start_dma_xfer", mmeadc01b_start_dma_xfer, METH_VARARGS, "Start DMA Transfer."},
   {"clear_dma_buf_status", mmeadc01b_clear_dma_buf_status, METH_VARARGS, "Clear DMA buffer status."},
   {"register_interrupt_callback", mmeadc01b_register_interrupt_callback, METH_VARARGS, "Register interrupt callback."},
   {"unregister_interrupt_callback", mmeadc01b_unregister_interrupt_callback, METH_VARARGS, "Unregister interrupt callback."},
