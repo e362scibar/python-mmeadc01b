@@ -213,10 +213,10 @@ class Device:
     def wfm_get(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmapped.")
-        if not self.get_interrupt_status()[0]:
-            time.sleep(0.1)
-            if not self.get_interrupt_status()[0]:
-                raise TimeoutError("Waveform timeout")
+        #if not self.get_interrupt_status()[0]:
+        #    time.sleep(0.1)
+        #    if not self.get_interrupt_status()[0]:
+        #        raise TimeoutError("Waveform timeout")
         status, adc, iq = devapi.get_waveform(self.dmabuf)
         return adc, iq
     def wfm_enable(self):
