@@ -4,6 +4,7 @@ from .register import Register
 import ctypes
 import time
 import numpy as np
+import pandas as pd
 
 NCH = 10
 NFIR = 32
@@ -326,4 +327,91 @@ class Device:
         self.write(Register(ch+"_ROT_A"), int(reg_a)&0xffff)
         self.write(Register(ch+"_ROT_B"), int(reg_b)&0xffff)
         self.write(Register(ch+"_ROT_C"), int(reg_c)&0xffff)
+
+    # BPM waveforms
+    def get_tone_wfm(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmaped.")
+        status, tone = devapi.get_waveform_tone(self.dmabuf)
+        return tone
+    def get_sp_wfm(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmaped.")
+        status, sp = devapi.get_waveform_sp(self.dmabuf)
+        return sp
+
+    # BPM data
+    def get_tbt_data(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmaped.")
+        status, data = devapi.get_tbt_data(self.dmabuf)
+        ret = []
+        for i in range(2):
+            tmp = {}
+            tmp['x'] = data[i,0,:]
+            tmp['y'] = data[i,1,:]
+            for j in range(4):
+                tmp['v{}'.format(j+1)] = data[i,2+j,:]
+            tmp['sum'] = data[i,6,:]+1.j*data[i,7,:]
+            tmp['ref'] = data[i,8,:]+1.j*data[i,9,:]
+            for j in range(10,16):
+                tmp['rsv{}'.format(j+1)] = data[i,j,:]
+            ret.append(pd.DataFrame(tmp))
+        return ret
+    def get_fa_data(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmaped.")
+        status, data = devapi.get_fa_data(self.dmabuf)
+        ret = []
+        for i in range(2):
+            tmp = {}
+            tmp['x'] = data[i,0,:]
+            tmp['y'] = data[i,1,:]
+            for j in range(4):
+                tmp['v{}'.format(j+1)] = data[i,2+j,:]
+            tmp['sum'] = data[i,6,:]+1.j*data[i,7,:]
+            tmp['ref'] = data[i,8,:]+1.j*data[i,9,:]
+            tmp['x3'] = data[i,10,:]
+            tmp['y3'] = data[i,11,:]
+            for j in range(12,16):
+                tmp['rsv{}'.format(j+1)] = data[i,j,:]
+            ret.append(pd.DataFrame(tmp))
+        return ret
+    def get_sa_data(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmaped.")
+        status, data = devapi.get_sa_data(self.dmabuf)
+        ret = []
+        for i in range(2):
+            tmp = {}
+            tmp['x'] = data[i,0,:]
+            tmp['y'] = data[i,1,:]
+            for j in range(4):
+                tmp['v{}'.format(j+1)] = data[i,2+j,:]
+            tmp['sum'] = data[i,6,:]+1.j*data[i,7,:]
+            tmp['ref'] = data[i,8,:]+1.j*data[i,9,:]
+            for j in range(4):
+                tmp['x{}'.format(j+1)] = data[i,10+j*2,:]
+                tmp['y{}'.format(j+1)] = data[i,11+j*2,:]
+            for j in range(18,32):
+                tmp['rsv{}'.format(j+1)] = data[i,j,:]
+            ret.append(pd.DataFrame(tmp))
+        return ret
+    def get_sp_data(self):
+        if self.dmabuf is None:
+            raise RuntimeError("DMA buffer not mmaped.")
+        status, data = devapi.get_sp_data(self.dmabuf)
+        sp = []
+        for i in range(2):
+            mask = []
+            for j in range(8):
+                tmp = {}
+                tmp['x'] = data[i,j,0,:]
+                tmp['y'] = data[i,j,1,:]
+                for k in range(4):
+                    tmp['v{}'.format(k+1)] = data[i,j,2+k,:]
+                tmp['sum'] = data[i,j,6,:]+1.j*data[i,j,7,:]
+                mask.append(pd.DataFrame(tmp))
+            sp.append(mask)
+        return sp
 

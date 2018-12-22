@@ -9,6 +9,8 @@
 
 #define NBUF 256
 
+#define INT24_TO_INT32(a) ((((a)&0xFFFFFF)<0x800000)?((a)&0xFFFFFF):(((a)&0xFFFFFF)-0x1000000))
+
 /* Helper functions */
 
 static int check_num(int num){
@@ -430,11 +432,8 @@ static PyObject* mmeadc01b_get_waveform_tone(PyObject* self, PyObject* args){
     for(j=0; j<N_TONE_FREQ; j++){
       for(k=0; k<N_TONE_POINTS; k++){
         float* p2 = (float*)PyArray_GETPTR3(wfm_tone, (npy_intp)i, (npy_intp)j, (npy_intp)k);
-        int tmp;
-        tmp = (p1[k*N_TONE_FREQ*2+j*2]&0xFFFFFF);
-        p2[0] = (float)((tmp<0x800000)?(tmp):(tmp-0x1000000));
-        tmp = (p1[k*N_TONE_FREQ*2+j*2+1]&0xFFFFFF);
-        p2[1] = (float)((tmp<0x800000)?(tmp):(tmp-0x1000000));
+        p2[0] = (float)INT24_TO_INT32(p1[k*N_TONE_FREQ*2+j*2]);
+        p2[1] = (float)INT24_TO_INT32(p1[k*N_TONE_FREQ*2+j*2+1]);
       }
     }
   }
@@ -482,7 +481,7 @@ static PyArrayObject* get_bpm_data(const void* dbuf[], const int index[], const 
     for(j=0; j<nelem; j++){
       for(k=0; k<npts; k++){
         float* p2 = (float*)PyArray_GETPTR3(data, (npy_intp)i, (npy_intp)j, (npy_intp)k);
-        *p2 = (float)(p1[k*nelem+j]);
+        *p2 = (float)INT24_TO_INT32(p1[k*nelem+j]);
       }
     }
   }
@@ -492,38 +491,50 @@ static PyArrayObject* get_bpm_data(const void* dbuf[], const int index[], const 
 static PyArrayObject* get_tbt_data(const void* dbuf[]){
   const int index[N_BPM_CH] = {BPM_CH_1_TBT, BPM_CH_2_TBT};
   const int nelem = 16;
-  return get_bpm_data(dbuf, index, nelem, N_BPM_POINTS_TBT);
+/*  const int npts = N_BPM_POINTS_TBT; */
+  const int npts = 1024;
+  return get_bpm_data(dbuf, index, nelem, npts);
 }
 
 static PyArrayObject* get_fa_data(const void* dbuf[]){
   const int index[N_BPM_CH] = {BPM_CH_1_FA, BPM_CH_2_FA};
   const int nelem = 16;
-  return get_bpm_data(dbuf, index, nelem, N_BPM_POINTS_FA);
+/*  const int npts = N_BPM_POINTS_FA; */
+  const int npts = 1024;
+  return get_bpm_data(dbuf, index, nelem, npts);
 }
 
 static PyArrayObject* get_sa_data(const void* dbuf[]){
   const int index[N_BPM_CH] = {BPM_CH_1_SA, BPM_CH_2_SA};
   const int nelem = 32;
-  return get_bpm_data(dbuf, index, nelem, N_BPM_POINTS_FA);
+/*  const int npts = N_BPM_POINTS_SA; */
+  const int npts = 256;
+  return get_bpm_data(dbuf, index, nelem, npts);
 }
 
 static PyArrayObject* get_sp_data(const void* dbuf[]){
   int i, j, k, l;
   const int ND = 4;
   const int IDX[N_BPM_CH] = {BPM_CH_1_SP_1, BPM_CH_2_SP_1};
+  const int N_MASK = N_MMEADC01B_SP_MASK;
   const int N_ELEM = 8;
+/*  const int N_PTS = N_BPM_POINTS_SP; */
+  const int N_PTS = 256;
   /* N_BPM_CH = 2 */
   /* N_BPM_SP_AREAS = 4 */
-  npy_intp dims[/*ND*/] = {N_BPM_CH, N_MMEADC01B_SP_MASK, N_ELEM, N_BPM_POINTS_SP};
+  npy_intp dims[/*ND*/] = {N_BPM_CH, N_MASK, N_ELEM, N_PTS};
   PyArrayObject* data;
   data = (PyArrayObject*)PyArray_SimpleNew(ND, dims, NPY_FLOAT32);
   for(i=0; i<N_BPM_CH; i++){
-    for(j=0; j<N_MMEADC01B_SP_MASK; j++){
-      const int* p1 = dbuf[IDX[i]+(size_t)(j*N_BPM_SP_AREAS/N_MMEADC01B_SP_MASK)];
+    const int* p1 = dbuf[IDX[i]];
+    for(j=0; j<N_MASK; j++){
       for(k=0; k<N_ELEM; k++){
-        for(l=0; l<N_BPM_POINTS_SP; l++){
+        for(l=0; l<N_PTS; l++){
+/*          const int* p1 = dbuf[IDX[i]+(size_t)(l*N_BPM_SP_AREAS/N_MASK/N_ELEM)]; */
           float* p2 = (float*)PyArray_GETPTR4(data, (npy_intp)i, (npy_intp)j, (npy_intp)k, (npy_intp)l);
-          *p2 = (float)(p1[(j%(N_MMEADC01B_SP_MASK/N_BPM_SP_AREAS))*N_ELEM*N_BPM_POINTS_SP+l*N_ELEM+k]);
+/*          size_t idx = (j%(N_MASK/N_BPM_SP_AREAS))*N_ELEM*N_PTS+l*N_ELEM*N_MASK+k; */
+          size_t idx = l*N_ELEM*N_MASK+k;
+          *p2 = (float)INT24_TO_INT32(p1[idx]);
         }
       }
     }
