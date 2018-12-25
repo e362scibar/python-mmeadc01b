@@ -533,7 +533,8 @@
 #define  MMEADC01B_REG_SRAM_DDC_IQ(ch)   (MMEADC01B_REG_DDC_IQ_1 + (LEN_DDC_DAT * (ch)))
 
 /* ************************************************************: BAR 4: added for LLRF */
-#define  LEN_MMEADC01B_BAR_4                     (128 << 10)             /* BAR 4: 128 [kB]    */
+//#define  LEN_MMEADC01B_BAR_4                     (128 << 10)             /* BAR 4: 128 [kB]    */
+#define  LEN_MMEADC01B_BAR_4                     (2 << 20)               /* BAR 4: 2 [MB]    */
 /*  BAR 4: I/Q modualtion coefficients */
 #define  MMEADC01B_REG_N_IQMOD_COEFF             0x00000000              /* N_IQMOD_COEFF      */
 #define  MMEADC01B_REG_IQMOD_COEFF_0             0x00000004              /* IQMOD_COEFF_0      */
