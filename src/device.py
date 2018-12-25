@@ -312,6 +312,9 @@ class Device:
         I = (ret&0xffff).astype('int16') / 32768.
         Q = ((ret>>16)&0xffff).astype('int16') / 32768.
         return I + 1.j * Q
+    def get_max(self):
+        ret = np.array(self.read(Register("PEAKHOLD_ADC01"), NCH), dtype=np.int)
+        return ret
 
     # Rotator functions
     def get_rotator(self, ch='IQ01'):
