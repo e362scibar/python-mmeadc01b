@@ -317,19 +317,17 @@ class Device:
         return ret
 
     # Rotator functions
-    def get_rotator(self, ch='IQ01'):
-        reg_a = self.read(Register(ch+"_ROT_A"))
-        reg_b = self.read(Register(ch+"_ROT_B"))
-        reg_c = self.read(Register(ch+"_ROT_C"))
-        reg = np.array([reg_a, reg_b, reg_c], dtype=np.int16).astype(np.float)
-        return (reg[0] + 0.5j * (reg[2] - reg[1])) / 0x1000
-    def set_rotator(self, ch='IQ01', z=1.0):
-        reg_a = np.clip(np.around(np.real(z) * 0x1000), -0x8000, 0x7fff)
-        reg_b = np.clip(np.around(-np.imag(z) * 0x1000), -0x8000, 0x7fff)
-        reg_c = np.clip(np.around(np.imag(z) * 0x1000), -0x8000, 0x7fff)
-        self.write(Register(ch+"_ROT_A"), int(reg_a)&0xffff)
-        self.write(Register(ch+"_ROT_B"), int(reg_b)&0xffff)
-        self.write(Register(ch+"_ROT_C"), int(reg_c)&0xffff)
+    def get_rotator(self, ch):
+        """ CH 0: DAC, CH 1-10: IQ """
+        status, gain, phase = devapi.get_rot_coeff(self.fd, ch)
+        if status:
+            raise Error(status)
+        return gain * np.exp(1.j * phase)
+    def set_rotator(self, ch, z=1.0):
+        """ CH 0: DAC, CH 1-10: IQ """
+        status = devapi.set_rot_coeff(self.fd, ch, np.abs(z), np.angle(z))
+        if status:
+            raise Error(status)
 
     # BPM waveforms
     def get_tone_wfm(self):

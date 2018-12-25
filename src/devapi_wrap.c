@@ -378,6 +378,26 @@ static PyObject* mmeadc01b_get_clk_src(PyObject* self, PyObject* args){
   return Py_BuildValue("ii", status, clk_src);
 }
 
+static PyObject* mmeadc01b_set_rot_coeff(PyObject* self, PyObject* args){
+  int status, fd, ch;
+  double gain, phase;
+  if(!PyArg_ParseTuple(args, "iidd", &fd, &ch, &gain, &phase)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_set_rot_coeff(fd, ch, gain, phase);
+  return PyLong_FromLong(status);
+}
+
+static PyObject* mmeadc01b_get_rot_coeff(PyObject* self, PyObject* args){
+  int status, fd, ch;
+  double gain, phase;
+  if(!PyArg_ParseTuple(args, "ii", &fd, &ch)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_get_rot_coeff(fd, ch, &gain, &phase);
+  return Py_BuildValue("idd", status, gain, phase);
+}
+
 static PyObject* mmeadc01b_get_waveform(PyObject* self, PyObject* args){
   int status=0, i, j;
   void* dbuf[N_DMA_BUF];
@@ -637,6 +657,8 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"reset_interrupt_status", mmeadc01b_reset_interrupt_status, METH_VARARGS, "Reset interrupt status."},
   {"set_clk_src", mmeadc01b_set_clk_src, METH_VARARGS, "Set clock source."},
   {"get_clk_src", mmeadc01b_get_clk_src, METH_VARARGS, "Get clock source."},
+  {"set_rot_coeff", mmeadc01b_set_rot_coeff, METH_VARARGS, "Set rotator coefficient."},
+  {"get_rot_coeff", mmeadc01b_get_rot_coeff, METH_VARARGS, "Get rotator coefficient."},
   {"get_waveform", mmeadc01b_get_waveform, METH_VARARGS, "Get ADC and IQ waveform data."},
   {"get_waveform_tone", mmeadc01b_get_waveform_tone, METH_VARARGS, "Get calibration tone waveform data."},
   {"get_waveform_sp", mmeadc01b_get_waveform_sp, METH_VARARGS, "Get SP waveform data."},
