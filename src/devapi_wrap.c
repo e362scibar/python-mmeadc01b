@@ -96,6 +96,30 @@ static int get_tuple_ptr(void** buf, PyObject* data){
   return num;
 }
 
+static PyObject* set_tuple_double(int num, const double* buf){
+  int i;
+  PyObject* data = PyTuple_New(num);
+  for(i=0; i<num; i++){
+    PyTuple_SetItem(data, i, PyFloat_FromDouble(buf[i]));
+  }
+  return data;
+}
+
+static int get_tuple_double(double* buf, PyObject* data){
+  int i, num;
+  if(!PyTuple_Check(data)){
+    return -1;
+  }
+  num = PyTuple_Size(data);
+  if(check_num(num)){
+    return -1;
+  }
+  for(i=0; i<num; i++){
+    buf[i] = PyFloat_AsDouble(PyTuple_GetItem(data, i));
+  }
+  return num;
+}
+
 /* Callback function */
 
 static int callback_status = 0;
@@ -158,6 +182,52 @@ static PyObject* mmeadc01b_write(PyObject* self, PyObject* args){
   num = get_tuple(wbuf, data);
   if(num <= 0){
     return NULL;
+  }
+  status = dev_mmeadc01b_write(fd, id_bar, ofs, num, wbuf);
+  return PyLong_FromLong(status);
+}
+
+static PyObject* mmeadc01b_read_float(PyObject* self, PyObject* args){
+  int status, i, fd, id_bar, ofs, num;
+  unsigned int rbuf[NBUF];
+  double dbuf[NBUF];
+  if(!PyArg_ParseTuple(args, "iiii", &fd, &id_bar, &ofs, &num)){
+    return NULL;
+  }
+  if(check_num(num)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_read(fd, id_bar, ofs, num, rbuf);
+  for(i=0; i<num; i++){
+    union _buf{
+      unsigned int i;
+      float f;
+    }buf;
+    buf.i = rbuf[i];
+    dbuf[i] = (double)buf.f;
+  }
+  return Py_BuildValue("iO", status, set_tuple_double(num, dbuf));
+}
+
+static PyObject* mmeadc01b_write_float(PyObject* self, PyObject* args){
+  int status, i, fd, id_bar, ofs, num;
+  unsigned int wbuf[NBUF];
+  double dbuf[NBUF];
+  PyObject* data;
+  if(!PyArg_ParseTuple(args, "iiiO", &fd, &id_bar, &ofs, &data)){
+    return NULL;
+  }
+  num = get_tuple_double(dbuf, data);
+  if(num <= 0){
+    return NULL;
+  }
+  for(i=0; i<num; i++){
+    union _buf{
+      unsigned int i;
+      float f;
+    }buf;
+    buf.f = (float)dbuf[i];
+    wbuf[i] = buf.i;
   }
   status = dev_mmeadc01b_write(fd, id_bar, ofs, num, wbuf);
   return PyLong_FromLong(status);
@@ -640,6 +710,8 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"close", mmeadc01b_close, METH_VARARGS, "Close MMEADC01B device."},
   {"read", mmeadc01b_read, METH_VARARGS, "Read register."},
   {"write", mmeadc01b_write, METH_VARARGS, "Write register."},
+  {"read_float", mmeadc01b_read_float, METH_VARARGS, "Read floating point numbers from registers."},
+  {"write_float", mmeadc01b_write_float, METH_VARARGS, "Write floating point numbers to registers."},
   {"adc_read", mmeadc01b_adc_read, METH_VARARGS, "Read ADC configuration."},
   {"adc_write", mmeadc01b_adc_write, METH_VARARGS, "Write ADC configuration."},
   {"dac_read", mmeadc01b_dac_read, METH_VARARGS, "Read DAC configuration."},

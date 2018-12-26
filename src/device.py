@@ -57,6 +57,26 @@ class Device:
         status = devapi.write(self.fd, reg.bar, reg.ofs, data)
         if status:
             raise Error(status)
+    def read_float(self, reg, num=1):
+        if self.fd is None:
+            raise RuntimeError("Device not opened.")
+        status, data = devapi.read_float(self.fd, reg.bar, reg.ofs, num)
+        if status:
+            raise Error(status)
+        if num == 1:
+            return data[0]
+        return data
+    def write_float(self, reg, data):
+        if self.fd is None:
+            raise RuntimeError("Device not opened.")
+        if not isinstance(data, tuple):
+            if isinstance(data, list):
+                data = tuple(data)
+            else:
+                data = (data,)
+        status = devapi.write_float(self.fd, reg.bar, reg.ofs, data)
+        if status:
+            raise Error(status)
     def adc_read(self, id_adc, addr, num=1):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
