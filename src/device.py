@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 NCH = 10
-NFIR = 32
+NFIR = 17
 
 class Device:
     """ MMEADC01B Device class """
@@ -276,7 +276,7 @@ class Device:
         if ch not in range(NCH):
             raise ValueError("Channel")
         if len(coeff) < NFIR:
-            coeff.extend([0]*(NFIR-len(coeff)))
+            coeff.reverse().extend([0]*(NFIR-len(coeff))).reverse()
         for i in range(NFIR):
             ival = coeff[i]*2**14
             if ival > 0x7fff:
