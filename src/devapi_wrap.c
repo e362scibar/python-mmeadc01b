@@ -120,16 +120,6 @@ static int get_tuple_double(double* buf, PyObject* data){
   return num;
 }
 
-/* Callback function */
-
-static int callback_status = 0;
-static int callback_source = 0;
-
-static void mmeadc01b_callback(int int_src){
-  callback_status = 1;
-  callback_source = int_src;
-}
-
 /* Wrapper functions */
 
 static PyObject* mmeadc01b_open(PyObject* self, PyObject* args){
@@ -373,6 +363,26 @@ static PyObject* mmeadc01b_munmap_dma_buf(PyObject* self, PyObject* args){
   return PyLong_FromLong(status);
 }
 
+static PyObject* mmeadc01b_start_dma_xfer(PyObject* self, PyObject* args){
+  int status, fd, idx_area;
+  unsigned int req_acq;
+  if(!PyArg_ParseTuple(args, "iIi", &fd, &req_acq, &idx_area)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_start_dma_xfer(fd, req_acq, idx_area);
+  return PyLong_FromLong(status);
+}
+
+static PyObject* mmeadc01b_get_ring_status(PyObject* self, PyObject* args){
+  int status, fd;
+  unsigned int cmplt;
+  if(!PyArg_ParseTuple(args, "i", &fd)){
+    return NULL;
+  }
+  status = dev_mmeadc01b_get_ring_status(fd, &cmplt);
+  return Py_BuildValue("iI", status, cmplt);
+}
+
 static PyObject* mmeadc01b_get_meta(PyObject* self, PyObject* args){
   int status, fd;
   mmeadc01b_xfer_meta_t xm[N_MMEADC01B_META_IDS];
@@ -394,40 +404,6 @@ static PyObject* mmeadc01b_clear_dma_buf_status(PyObject* self, PyObject* args){
   }
   status = dev_mmeadc01b_clear_dma_buf_status(fd);
   return PyLong_FromLong(status);
-}
-
-static PyObject* mmeadc01b_register_interrupt_callback(PyObject* self, PyObject* args){
-  int status, fd;
-  if(!PyArg_ParseTuple(args, "i", &fd)){
-    return NULL;
-  }
-  status = dev_mmeadc01b_register_interrupt_callback(fd, mmeadc01b_callback, getpid());
-  return PyLong_FromLong(status);
-}
-
-static PyObject* mmeadc01b_unregister_interrupt_callback(PyObject* self, PyObject* args){
-  int status=0, fd;
-  if(!PyArg_ParseTuple(args, "i", &fd)){
-    return NULL;
-  }
-  status = dev_mmeadc01b_unregister_interrupt_callback(fd);
-  return PyLong_FromLong(status);
-}
-
-static PyObject* mmeadc01b_get_interrupt_status(PyObject* self, PyObject* args){
-  if(!PyArg_ParseTuple(args, "")){
-    return NULL;
-  }
-  return Py_BuildValue("ii", callback_status, callback_source);
-}
-
-static PyObject* mmeadc01b_reset_interrupt_status(PyObject* self, PyObject* args){
-  if(!PyArg_ParseTuple(args, "")){
-    return NULL;
-  }
-  callback_status = 0;
-  callback_source = 0;
-  Py_RETURN_NONE;
 }
 
 static PyObject* mmeadc01b_set_clk_src(PyObject* self, PyObject* args){
@@ -721,12 +697,10 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"user_i2c_write", mmeadc01b_user_i2c_write, METH_VARARGS, "Write user I2C of RTM."},
   {"mmap_dma_buf", mmeadc01b_mmap_dma_buf, METH_VARARGS, "Mmap for DMA transfer."},
   {"munmap_dma_buf", mmeadc01b_munmap_dma_buf, METH_VARARGS, "Munmap for DMA transfer."},
+  {"start_dma_xfer", mmeadc01b_start_dma_xfer, METH_VARARGS, "Start DMA transfer."},
+  {"get_ring_status", mmeadc01b_get_ring_status, METH_VARARGS, "Get ring buffer status."},
   {"get_meta", mmeadc01b_get_meta, METH_VARARGS, "Get metadata."},
   {"clear_dma_buf_status", mmeadc01b_clear_dma_buf_status, METH_VARARGS, "Clear DMA buffer status."},
-  {"register_interrupt_callback", mmeadc01b_register_interrupt_callback, METH_VARARGS, "Register interrupt callback."},
-  {"unregister_interrupt_callback", mmeadc01b_unregister_interrupt_callback, METH_VARARGS, "Unregister interrupt callback."},
-  {"get_interrupt_status", mmeadc01b_get_interrupt_status, METH_VARARGS, "Get interrupt status."},
-  {"reset_interrupt_status", mmeadc01b_reset_interrupt_status, METH_VARARGS, "Reset interrupt status."},
   {"set_clk_src", mmeadc01b_set_clk_src, METH_VARARGS, "Set clock source."},
   {"get_clk_src", mmeadc01b_get_clk_src, METH_VARARGS, "Get clock source."},
   {"set_rot_coeff", mmeadc01b_set_rot_coeff, METH_VARARGS, "Set rotator coefficient."},

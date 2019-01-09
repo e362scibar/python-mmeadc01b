@@ -21,6 +21,13 @@
 
 #define  N_DMA_BUF         N_MMEADC01B_CH /* share one chunk of DMA xfer buf with all CHs. */
 
+///* uncomment a below lone if all DBUFs are allocated when insmod. */
+//#define  ALLOC_DBUF_EACH_TIME_DMA /* allocate DMA xfer buffer each time DMA xfer. */
+
+#define  MMEADC01B_DMA_STATE_IDLE       0
+#define  MMEADC01B_DMA_STATE_RUNNING    1
+#define  MMEADC01B_DMA_STATE_DONE       2
+
 /**
  * @struct mmeadc01b_dinfo_t
  * @struct DMA xfer buffer info.
@@ -35,79 +42,122 @@ typedef struct {
 
 /**
  * @struct mmeadc01b_req_dma_t
- * @brief  
+ * @brief  DMA xfer request info
  */
 typedef struct {
     uint32_t    req_acq;              /* DMA xfer request                           */
-    int         idx_ring;             /* where data stored to be xfered in the Ring */
+    int         idx_area;             /* where data stored to be xfered in the Ring */
 } mmeadc01b_req_dma_t;
 
 /*
  * DMA xfer data request
- *  5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- * +-+-+-+-+-+-+-+-+------+-+-+-+-+
- * |      B|      B|      |C|   |W|
- * |      P|      P|   R  |A| R |a|
- * |      M|      M|   S  |L| S |v|
- * |      2|      1|   V  | | V |e|
- * +-+-+-+-+-+-+-+-+   D  |T| D |f|
- * |S|S|F|T|S|S|F|T|      |o|   |o|
- * |P|A|A|b|P|A|A|b|      |n|   |r|
- * | | | |T| | | |T|      |e|   |m|
- * +-+-+-+-+-+-+-+-+------+-+-+-+-+
+ *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+ *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+ *   +-------+-------+-+-------------+-+-------------+---+-+-+-+-+-+-+
+ *   |                 |            B| |            B|   |C|C| |  f W|
+ *   |                 |            P|R|            P| R |a|a|R|  o a|
+ *   |                 |            M|S|            M| S |l|l|S|  r v|
+ *   |  (_Reserverd_)  |            2|V|            1| V |T|T|V|s m e|
+ *   |                 |-+-+-+-+-+-+-+D|-+-+-+-+-+-+-+ D |o|o|D|-+-+-+
+ *   |                 |S|S|S|S|S|F|T| |S|S|S|S|S|F|T|   |n|n| |S|I|A|
+ *   |                 |P|P|P|P|A|A|b| |P|P|P|P|A|A|b|   |e|e| |P|/|D|
+ *   |                 |4|3|2|1| | |T| |4|3|2|1| | |T|   |2|1| | |Q| |
+ *   +-------+-------+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+---+-+-+-+-+-+-+
  */
-#define  MMEADC01B_REQ_BPM2            BIT12 /* DMA xfer completion: BPM  2                */
-#define  MMEADC01B_REQ_BPM1             BIT8 /* DMA xfer completion: BPM 1                 */
-#define  MMEADC01B_REQ_TONE             BIT3 /* DMA xfer completion: CAL Tone              */
-#define  MMEADC01B_REQ_WFM              BIT0 /* DMA xfer completion: Wabeforms (AD,I/Q,SP) */
+#define  MMEADC01B_REQ_BPM2_SP_PROC4   BIT22 /* DMA xfer request: BPM  2 SP  Process (4 of 4) */
+#define  MMEADC01B_REQ_BPM2_SP_PROC3   BIT21 /* DMA xfer request: BPM  2 SP  Process (3 of 4) */
+#define  MMEADC01B_REQ_BPM2_SP_PROC2   BIT20 /* DMA xfer request: BPM  2 SP  Process (2 of 4) */
+#define  MMEADC01B_REQ_BPM2_SP_PROC1   BIT19 /* DMA xfer request: BPM  2 SP  Process( 1 of 4) */
+#define  MMEADC01B_REQ_BPM2_COD_SA     BIT18 /* DMA xfer request: BPM  2 COD SA               */
+#define  MMEADC01B_REQ_BPM2_COD_FA     BIT17 /* DMA xfer request: BPM  2 COD FA               */
+#define  MMEADC01B_REQ_BPM2_COD_TBT    BIT16 /* DMA xfer request: BPM  2 COD TBT              */
+
+#define  MMEADC01B_REQ_BPM1_SP_PROC4   BIT14 /* DMA xfer request: BPM 1  SP  Process (4 of 4) */
+#define  MMEADC01B_REQ_BPM1_SP_PROC3   BIT13 /* DMA xfer request: BPM 1  SP  Process (3 of 4) */
+#define  MMEADC01B_REQ_BPM1_SP_PROC2   BIT12 /* DMA xfer request: BPM 1  SP  Process (2 of 4) */
+#define  MMEADC01B_REQ_BPM1_SP_PROC1   BIT11 /* DMA xfer request: BPM 1  SP  Process( 1 of 4) */
+#define  MMEADC01B_REQ_BPM1_COD_SA     BIT10 /* DMA xfer request: BPM 1  COD SA               */
+#define  MMEADC01B_REQ_BPM1_COD_FA      BIT9 /* DMA xfer request: BPM 1  COD FA               */
+#define  MMEADC01B_REQ_BPM1_COD_TBT     BIT8 /* DMA xfer request: BPM 1  COD TBT              */
+
+#define  MMEADC01B_REQ_TONE2            BIT5 /* DMA xfer request: CAL Tone  2                 */
+#define  MMEADC01B_REQ_TONE1            BIT4 /* DMA xfer request: CAL Tone 1                  */
+
+#define  MMEADC01B_REQ_SP               BIT2 /* DMA xfer request: SP                          */
+#define  MMEADC01B_REQ_IQ               BIT1 /* DMA xfer request: IQ                          */
+#define  MMEADC01B_REQ_ADC              BIT0 /* DMA xfer request: ADC                         */
+#define  MMEADC01B_REQ_WFM              BIT0 /* DMA xfer request: Waveforms(ADC, I/Q, and SP) */
 
 #define  MMEADC01B_RING_NO_DATA           -1 /* no data available in the Ring */
 
 /*
  * DMA xfer completion
- *  5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- * +-+-+-+-+-+-+-+-+------+-+-+-+-+
- * |      B|      B|      |C|S|I|A|
- * |      P|      P|   R  |A|P|/|D|
- * |      M|      M|   S  |L| |Q| |
- * |      2|      1|   V  | | | | |
- * +-+-+-+-+-+-+-+-+   D  |T| | | |
- * |S|S|F|T|S|S|F|T|      |o| | | |
- * |P|A|A|b|P|A|A|b|      |n| | | |
- * | | | |T| | | |T|      |e| | | |
- * +-+-+-+-+-+-+-+-+------+-+-+-+-+
+ *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+ *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+ *   +-------+-------+-+-------------+-+-------------+---+-+-+-+-+-+-+
+ *   |                 |            B| |            B|   |C|C| |  f W|
+ *   |                 |            P|R|            P| R |a|a|R|  o a|
+ *   |                 |            M|S|            M| S |l|l|S|  r v|
+ *   |  (_Reserverd_)  |            2|V|            1| V |T|T|V|s m e|
+ *   |                 |-+-+-+-+-+-+-+D|-+-+-+-+-+-+-+ D |o|o|D|-+-+-+
+ *   |                 |S|S|S|S|S|F|T| |S|S|S|S|S|F|T|   |n|n| |S|I|A|
+ *   |                 |P|P|P|P|A|A|b| |P|P|P|P|A|A|b|   |e|e| |P|/|D|
+ *   |                 |4|3|2|1| | |T| |4|3|2|1| | |T|   |2|1| | |Q| |
+ *   +-------+-------+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+---+-+-+-+-+-+-+
  */
-#define  MMEADC01B_CMPLT_BPM2_SP_PROC  BIT15 /* DMA xfer completion: BPM  2 SP  Process */
-#define  MMEADC01B_CMPLT_BPM2_COD_SA   BIT14 /* DMA xfer completion: BPM  2 COD SA      */
-#define  MMEADC01B_CMPLT_BPM2_COD_FA   BIT13 /* DMA xfer completion: BPM  2 COD FA      */
-#define  MMEADC01B_CMPLT_BPM2_COD_TBT  BIT12 /* DMA xfer completion: BPM  2 COD TBT     */
-#define  MMEADC01B_CMPLT_BPM1_SP_PROC  BIT11 /* DMA xfer completion: BPM 1  SP  Process */
+#define  MMEADC01B_CMPLT_BPM2_SP_PROC4 BIT22 /* DMA xfer completion: BPM  2 SP  Process */
+#define  MMEADC01B_CMPLT_BPM2_SP_PROC3 BIT21 /* DMA xfer completion: BPM  2 SP  Process */
+#define  MMEADC01B_CMPLT_BPM2_SP_PROC2 BIT20 /* DMA xfer completion: BPM  2 SP  Process */
+#define  MMEADC01B_CMPLT_BPM2_SP_PROC1 BIT19 /* DMA xfer completion: BPM  2 SP  Process */
+#define  MMEADC01B_CMPLT_BPM2_COD_SA   BIT18 /* DMA xfer completion: BPM  2 COD SA      */
+#define  MMEADC01B_CMPLT_BPM2_COD_FA   BIT17 /* DMA xfer completion: BPM  2 COD FA      */
+#define  MMEADC01B_CMPLT_BPM2_COD_TBT  BIT16 /* DMA xfer completion: BPM  2 COD TBT     */
+
+#define  MMEADC01B_CMPLT_BPM1_SP_PROC4 BIT14 /* DMA xfer completion: BPM 1  SP  Process */
+#define  MMEADC01B_CMPLT_BPM1_SP_PROC3 BIT13 /* DMA xfer completion: BPM 1  SP  Process */
+#define  MMEADC01B_CMPLT_BPM1_SP_PROC2 BIT12 /* DMA xfer completion: BPM 1  SP  Process */
+#define  MMEADC01B_CMPLT_BPM1_SP_PROC1 BIT11 /* DMA xfer completion: BPM 1  SP  Process */
 #define  MMEADC01B_CMPLT_BPM1_COD_SA   BIT10 /* DMA xfer completion: BPM 1  COD SA      */
 #define  MMEADC01B_CMPLT_BPM1_COD_FA    BIT9 /* DMA xfer completion: BPM 1  COD FA      */
 #define  MMEADC01B_CMPLT_BPM1_COD_TBT   BIT8 /* DMA xfer completion: BPM 1  COD TBT     */
-#define  MMEADC01B_CMPLT_TONE           BIT3 /* DMA xfer completion: CAL Tone           */
+
+#define  MMEADC01B_CMPLT_TONE2          BIT5 /* DMA xfer completion: CAL Tone           */
+#define  MMEADC01B_CMPLT_TONE1          BIT4 /* DMA xfer completion: CAL Tone           */
+
 #define  MMEADC01B_CMPLT_SP             BIT2 /* DMA xfer completion: SP                 */
-#define  MMEADC01B_CMPLT_IO             BIT1 /* DMA xfer completion: IO                 */
-#define  MMEADC01B_CMPLT_AD             BIT0 /* DMA xfer completion: AD                 */
+#define  MMEADC01B_CMPLT_IQ             BIT1 /* DMA xfer completion: IQ                 */
+#define  MMEADC01B_CMPLT_ADC            BIT0 /* DMA xfer completion: AD                 */
+
+#define  MMEADC01B_CMPLT_WFM          (MMEADC01B_CMPLT_ADC | MMEADC01B_CMPLT_IQ | MMEADC01B_CMPLT_SP)
+
+#define  MMEADC01B_CMPLT_BPM2_SP_PROC (MMEADC01B_CMPLT_BPM2_SP_PROC1 | MMEADC01B_CMPLT_BPM2_SP_PROC2 | MMEADC01B_CMPLT_BPM2_SP_PROC3 | MMEADC01B_CMPLT_BPM2_SP_PROC4)
+#define  MMEADC01B_CMPLT_BPM1_SP_PROC (MMEADC01B_CMPLT_BPM1_SP_PROC1 | MMEADC01B_CMPLT_BPM1_SP_PROC2 | MMEADC01B_CMPLT_BPM1_SP_PROC3 | MMEADC01B_CMPLT_BPM1_SP_PROC4)
 
 /**
  * @struct mmeadc01b_xfer_meta_t
  * @brief  DMA xfer data META info
  */
 typedef struct {
+    int        idx_latest;         /* ring buffer latest position             */
+    int        idx_intl;           /* ring buffer position where intl occured */
     int        wrapped;            /* ring buffer is wrap around or not ?     */
     int        npt;                /* # of points of ACQed data               */
 } mmeadc01b_xfer_meta_t;
 
 #define  MMEADC01B_META_ID_ADC            0 /* META ID for ADC               */
 #define  MMEADC01B_META_ID_IQ             1 /* META ID for I/Q               */
-#define  MMEADC01B_META_ID_TONE           2 /* META ID for CAL Tone          */
-#define  MMEADC01B_META_ID_SP             3 /* META ID for SP                */
-#define  MMEADC01B_META_ID_BPM_COD_TBT    4 /* META ID for BPM > COD TbT     */
-#define  MMEADC01B_META_ID_BPM_COD_FA     5 /* META ID for BPM > COD FA      */
-#define  MMEADC01B_META_ID_BPM_COD_SA     6 /* META ID for BPM > COD SA      */
-#define  MMEADC01B_META_ID_BPM_SP_PROC    7 /* META ID for BPM > SP_ Process */
-#define  N_MMEADC01B_META_IDS             8 /* # of META IDs                 */
+#define  MMEADC01B_META_ID_SP             2 /* META ID for SP                */
+#define  MMEADC01B_META_ID_TONE1          3 /* META ID for CAL Tone          */
+#define  MMEADC01B_META_ID_TONE2          4 /* META ID for CAL Tone          */
+#define  MMEADC01B_META_ID_BPM_1_COD_TBT  5 /* META ID for BPM > COD TbT     */
+#define  MMEADC01B_META_ID_BPM_1_COD_FA   6 /* META ID for BPM > COD FA      */
+#define  MMEADC01B_META_ID_BPM_1_COD_SA   7 /* META ID for BPM > COD SA      */
+#define  MMEADC01B_META_ID_BPM_1_SP_PROC  8 /* META ID for BPM > SP_ Process */
+#define  MMEADC01B_META_ID_BPM_2_COD_TBT  9 /* META ID for BPM > COD TbT     */
+#define  MMEADC01B_META_ID_BPM_2_COD_FA  10 /* META ID for BPM > COD FA      */
+#define  MMEADC01B_META_ID_BPM_2_COD_SA  11 /* META ID for BPM > COD SA      */
+#define  MMEADC01B_META_ID_BPM_2_SP_PROC 12 /* META ID for BPM > SP_ Process */
+#define  N_MMEADC01B_META_IDS            13 /* # of META IDs                 */
 
 /**
  * @struct mmeadc01b_reg_rw
@@ -156,14 +206,14 @@ typedef struct {
 typedef struct {
     uint32_t   bp_4p_x;         /* BP  quad-pole X       */
     uint32_t   bp_4p_y;         /* BP  quad-pole  Y      */
-    uint32_t   bpm_amp_v1;      /* BPM ammplitude V1     */
-    uint32_t   bpm_amp_v2;      /* BPM ammplitude  V2    */
-    uint32_t   bpm_amp_v3;      /* BPM ammplitude   V3   */
-    uint32_t   bpm_amp_v4;      /* BPM ammplitude    V4  */
+    uint32_t   bpm_amp_v1;      /* BPM amplitude  V1     */
+    uint32_t   bpm_amp_v2;      /* BPM amplitude   V2    */
+    uint32_t   bpm_amp_v3;      /* BPM amplitude    V3   */
+    uint32_t   bpm_amp_v4;      /* BPM amplitude     V4  */
     uint32_t   vecsum_i;        /* Vector sum for   I    */
     uint32_t   vecsum_q;        /* Vector sum for    Q   */
     uint32_t   ref_i;           /* reference signal I    */
-    uint32_t   req_q;           /* reference signal  Q   */
+    uint32_t   ref_q;           /* reference signal  Q   */
     uint32_t   rsvd[ 6];        /* (_Reserved_)          */
 } mmeadc01b_bpm_cod_tbt_t;
 
@@ -174,14 +224,14 @@ typedef struct {
 typedef struct {
     uint32_t   bp_4p_x;         /* BP  quad-pole X       */
     uint32_t   bp_4p_y;         /* BP  quad-pole  Y      */
-    uint32_t   bpm_amp_v1;      /* BPM ammplitude V1     */
-    uint32_t   bpm_amp_v2;      /* BPM ammplitude  V2    */
-    uint32_t   bpm_amp_v3;      /* BPM ammplitude   V3   */
-    uint32_t   bpm_amp_v4;      /* BPM ammplitude    V4  */
+    uint32_t   bpm_amp_v1;      /* BPM amplitude  V1     */
+    uint32_t   bpm_amp_v2;      /* BPM amplitude   V2    */
+    uint32_t   bpm_amp_v3;      /* BPM amplitude    V3   */
+    uint32_t   bpm_amp_v4;      /* BPM amplitude     V4  */
     uint32_t   vecsum_i;        /* Vector sum for   I    */
     uint32_t   vecsum_q;        /* Vector sum for    Q   */
     uint32_t   ref_i;           /* reference signal I    */
-    uint32_t   req_q;           /* reference signal  Q   */
+    uint32_t   ref_q;           /* reference signal  Q   */
     uint32_t   bp_3p_x;         /* BP   tri-pole X       */
     uint32_t   bp_3p_y;         /* BP   tri-pole  Y      */
     uint32_t   rsvd[ 4];        /* (_Reserved_)          */
@@ -194,14 +244,14 @@ typedef struct {
 typedef struct {
     uint32_t   bp_4p_x;         /* BP  quad-pole X       */
     uint32_t   bp_4p_y;         /* BP  quad-pole  Y      */
-    uint32_t   bpm_amp_v1;      /* BPM ammplitude V1     */
-    uint32_t   bpm_amp_v2;      /* BPM ammplitude  V2    */
-    uint32_t   bpm_amp_v3;      /* BPM ammplitude   V3   */
-    uint32_t   bpm_amp_v4;      /* BPM ammplitude    V4  */
+    uint32_t   bpm_amp_v1;      /* BPM amplitude  V1     */
+    uint32_t   bpm_amp_v2;      /* BPM amplitude   V2    */
+    uint32_t   bpm_amp_v3;      /* BPM amplitude    V3   */
+    uint32_t   bpm_amp_v4;      /* BPM amplitude     V4  */
     uint32_t   vecsum_i;        /* Vector sum for   I    */
     uint32_t   vecsum_q;        /* Vector sum for    Q   */
     uint32_t   ref_i;           /* reference signal I    */
-    uint32_t   req_q;           /* reference signal  Q   */
+    uint32_t   ref_q;           /* reference signal  Q   */
     uint32_t   bp_3p_x1;        /* BP   tri-pole X  1    */
     uint32_t   bp_3p_y1;        /* BP   tri-pole  Y 1    */
     uint32_t   bp_3p_x2;        /* BP   tri-pole X   2   */
@@ -210,7 +260,7 @@ typedef struct {
     uint32_t   bp_3p_y3;        /* BP   tri-pole  Y   3  */
     uint32_t   bp_3p_x4;        /* BP   tri-pole X     4 */
     uint32_t   bp_3p_y4;        /* BP   tri-pole  Y    4 */
-    uint32_t   rsvd[ 4];        /* (_Reserved_)          */
+    uint32_t   rsvd[14];        /* (_Reserved_)          */
 } mmeadc01b_bpm_cod_sa_t;
 
 /**
@@ -220,10 +270,10 @@ typedef struct {
 typedef struct {
     uint32_t   bp_4p_x;         /* BP  quad-pole X       */
     uint32_t   bp_4p_y;         /* BP  quad-pole  Y      */
-    uint32_t   bpm_amp_v1;      /* BPM ammplitude V1     */
-    uint32_t   bpm_amp_v2;      /* BPM ammplitude  V2    */
-    uint32_t   bpm_amp_v3;      /* BPM ammplitude   V3   */
-    uint32_t   bpm_amp_v4;      /* BPM ammplitude    V4  */
+    uint32_t   bpm_amp_v1;      /* BPM amplitude  V1     */
+    uint32_t   bpm_amp_v2;      /* BPM amplitude   V2    */
+    uint32_t   bpm_amp_v3;      /* BPM amplitude    V3   */
+    uint32_t   bpm_amp_v4;      /* BPM amplitude     V4  */
     uint32_t   vecsum_i;        /* Vector sum for   I    */
     uint32_t   vecsum_q;        /* Vector sum for    Q   */
 } mmeadc01b_bpm_sp_proc_msk_t;
@@ -258,6 +308,10 @@ typedef struct {
 #define  MMEADC01B_GET_CLK_SRC            _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  17), int)
 #define  MMEADC01B_GET_META               _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  18), int)
 #define  MMEADC01B_START_DMA_XFER         _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  19), int)
+#define  MMEADC01B_GET_RING_STATUS        _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  20), int)
+#define  MMEADC01B_ALLOC_DBUF             _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  21), int)
+#define  MMEADC01B_FREE_DBUF              _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  22), int)
+#define  MMEADC01B_INIT_DMA_POS           _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  23), int)
 
 #define  MMEADC01B_TEST_DMA               _IOWR(MMEADC01B_IOC, (BD_USER_IOCTL_MINNR +  99), int)
 
