@@ -181,10 +181,10 @@ class Device:
     def get_meta(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        status, adc, iq = devapi.get_meta(self.fd)
+        status, meta = devapi.get_meta(self.fd)
         if status:
             raise Error(status)
-        return adc, iq
+        return meta
     def clear_dma_buf_status(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")

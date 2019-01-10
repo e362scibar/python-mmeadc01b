@@ -120,6 +120,18 @@ static int get_tuple_double(double* buf, PyObject* data){
   return num;
 }
 
+static PyObject* set_tuple_meta(int num, const mmeadc01b_xfer_meta_t* xm){
+  int i;
+  PyObject* data = PyTuple_New(num);
+  for(i=0; i<num; i++){
+    PyObject* dict = Py_BuildValue("{s:i,s:i,s:i,s:i}",
+      "idx_latest", xm[i].idx_latest, "idx_intl", xm[i].idx_intl,
+      "wrapped", xm[i].wrapped, "npt", xm[i].npt);
+    PyTuple_SetItem(data, i, dict);
+  }
+  return data;
+}
+
 /* Wrapper functions */
 
 static PyObject* mmeadc01b_open(PyObject* self, PyObject* args){
@@ -390,11 +402,7 @@ static PyObject* mmeadc01b_get_meta(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_get_meta(fd, xm);
-  return Py_BuildValue("i{s:i,s:i}{s:i,s:i}", status,
-    "wrapped", xm[MMEADC01B_META_ID_ADC].wrapped,
-    "npt", xm[MMEADC01B_META_ID_ADC].npt,
-    "wrapped", xm[MMEADC01B_META_ID_IQ].wrapped,
-    "npt", xm[MMEADC01B_META_ID_IQ].npt);
+  return Py_BuildValue("iO", status, set_tuple_meta(N_MMEADC01B_META_IDS, xm));
 }
 
 static PyObject* mmeadc01b_clear_dma_buf_status(PyObject* self, PyObject* args){
