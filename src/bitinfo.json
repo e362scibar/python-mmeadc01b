@@ -198,5 +198,30 @@
     "CH08",
     "CH09",
     "CH10"
+  ],
+  "RING_STAT": [
+    "ADC_WFM",
+    "IQ_WFM",
+    "SP_WFM",
+    null,
+    "CT_L",
+    "CT_H",
+    null,
+    null,
+    "BPM1TBT",
+    "BPM1FA",
+    "BPM1SA",
+    "BPM1SP1",
+    "BPM1SP2",
+    "BPM1SP3",
+    "BPM1SP4",
+    null,
+    "BPM2TBT",
+    "BPM2FA",
+    "BPM2SA",
+    "BPM2SP1",
+    "BPM2SP2",
+    "BPM2SP3",
+    "BPM2SP4"
   ]
 }

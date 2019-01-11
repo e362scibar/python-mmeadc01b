@@ -178,7 +178,7 @@ class Device:
         status, cmplt = devapi.get_ring_status(self.fd)
         if status:
             raise Error(status)
-        return cmplt
+        return Bitfield("RING_STAT", cmplt)
     def get_meta(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
