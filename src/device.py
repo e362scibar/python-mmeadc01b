@@ -247,7 +247,8 @@ class Device:
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmapped.")
         status, adc, iq = devapi.get_waveform(self.dmabuf)
-        return adc, iq
+        status, sp = devapi.get_waveform_sp(self.dmabuf)
+        return adc, iq, sp
     def wfm_enable(self):
         self.clear_dma_buf_status()
     def get_wfm_sample_step(self):
