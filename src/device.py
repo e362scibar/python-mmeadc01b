@@ -10,6 +10,10 @@ import pandas as pd
 NCH = 10
 NFIR = 17
 
+META = ["ADC_WFM", "IQ_WFM", "SP_WFM", "CT_L", "CT_H",
+        "BPM1TBT", "BPM1FA", "BPM1SA", "BPM1SP",
+        "BPM2TBT", "BPM2FA", "BPM2SA", "BPM2SP"]
+
 class Device:
     """ MMEADC01B Device class """
     clk_src = {"EXT":0, "RTM0":1, "RTM1":2, "INT":3}
@@ -185,7 +189,7 @@ class Device:
         status, meta = devapi.get_meta(self.fd)
         if status:
             raise Error(status)
-        return meta
+        return {key: meta[i] for i, key in enumerate(META)}
     def clear_dma_buf_status(self):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
