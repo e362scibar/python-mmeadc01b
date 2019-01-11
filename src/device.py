@@ -1,6 +1,7 @@
 from . import devapi
 from .error import Error
 from .register import Register
+from .bitfield import Bitfield
 import ctypes
 import time
 import numpy as np
@@ -210,6 +211,20 @@ class Device:
         if status:
             raise Error(status)
         return list(self.clk_src.keys())[list(self.clk_src.values()).index(src)]
+
+    # Interrupt methods
+    def get_interrupt_status(self):
+        return Bitfield("INTR", self.read(Register("INTR_STATUS")))
+    def clear_interrupt_status(self, arg):
+        if isinstance(arg, Bitfield) and arg.name != "INTR":
+            return TypeError("Invalid Bitfield ({}).".format(arg.name))
+        self.write(Register("INTR_CLR"), int(arg))
+    def get_interrupt_mask(self):
+        return Bitfield("INTR", self.read(Register("INTR_MASK")))
+    def set_interrupt_mask(self, arg):
+        if isinstance(arg, Bitfield) and arg.name != "INTR":
+            return TypeError("Invalid Bitfield ({}).".format(arg.name))
+        self.write(Register("INTR_MASK"), int(arg))
 
     # Waveform methods
     def wfm_init(self):
