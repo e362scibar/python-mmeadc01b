@@ -16,6 +16,7 @@ setup(name="mmeadc01b",
                 url="http://xfel.riken.jp/",
                 packages=["mmeadc01b"],
                 package_dir={"mmeadc01b":"src"},
-                package_data={"mmeadc01b": ["regdata.txt","errordata.txt"]},
+                package_data={"mmeadc01b": ["regdata.txt","errordata.txt",
+                        "bitinfo.json"]},
                 ext_modules = [ext_devapi])
 
