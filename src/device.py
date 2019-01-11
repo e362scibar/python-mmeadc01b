@@ -164,11 +164,7 @@ class Device:
             raise RuntimeError("DMA buffer not mmapped.")
         status = devapi.munmap_dma_buf(self.fd, self.dmabuf)
         if status:
-            err = Error(status)
-            if err.data[status] == "MMEADC01B_ERR_INVALID":
-                print("munmap:", err)
-            else:
-                raise err
+            raise Error(status)
         self.dmabuf = None
     def start_dma_xfer(self, req_acq, idx_area):
         if self.fd is None:
