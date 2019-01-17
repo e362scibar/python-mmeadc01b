@@ -24,6 +24,26 @@ static int check_num(int num){
   return 0;
 }
 
+static int check_bpm_ch(int ch){
+  if(ch < 0 || ch >= N_BPM_CH){
+    char str[NBUF];
+    sprintf(str, "Invalid BPM channel %d", ch);
+    PyErr_SetString(PyExc_IndexError, str);
+    return -1;
+  }
+  return 0;
+}
+
+static int check_sp_block(int block){
+  if(block < 0 || block >= N_BPM_SP_BLOCKS){
+    char str[NBUF];
+    sprintf(str, "Invalid SP block %d", block);
+    PyErr_SetString(PyExc_IndexError, str);
+    return -1;
+  }
+  return 0;
+}
+
 static PyObject* set_tuple(int num, const unsigned int* buf){
   int i;
   PyObject* data = PyTuple_New(num);
@@ -543,147 +563,114 @@ static PyObject* mmeadc01b_get_waveform_sp(PyObject* self, PyObject* args){
 
 /* BPM Data Stream */
 
-static PyArrayObject* get_bpm_data(const void* dbuf[], const int index[], const int nelem, const int npts){
-  int i, j, k;
-  const int ND = 3;
+static PyArrayObject* get_bpm_data(const int32_t* dbuf, const int nelem, const int npts){
+  int i, j;
+  const int ND = 2;
   /* N_BPM_CH = 2 */
-  npy_intp dims[/*ND*/] = {N_BPM_CH, nelem, npts};
+  npy_intp dims[/*ND*/] = {nelem, npts};
   PyArrayObject* data;
   data = (PyArrayObject*)PyArray_SimpleNew(ND, dims, NPY_FLOAT32);
-  for(i=0; i<N_BPM_CH; i++){
-    const int* p1 = dbuf[index[i]];
-    for(j=0; j<nelem; j++){
-      for(k=0; k<npts; k++){
-        float* p2 = (float*)PyArray_GETPTR3(data, (npy_intp)i, (npy_intp)j, (npy_intp)k);
-        *p2 = (float)INT24_TO_INT32(p1[k*nelem+j]);
-      }
+  for(i=0; i<nelem; i++){
+    for(j=0; j<npts; j++){
+      float* p = (float*)PyArray_GETPTR2(data, (npy_intp)i, (npy_intp)j);
+      *p = (float)INT24_TO_INT32(dbuf[j*nelem+i]);
     }
   }
   return data;
 }
 
-static PyArrayObject* get_tbt_data(const void* dbuf[]){
+static PyObject* mmeadc01b_get_tbt_data(PyObject* self, PyObject* args){
+  int status=0, ch;
   const int index[N_BPM_CH] = {BPM_CH_1_TBT, BPM_CH_2_TBT};
-  const int nelem = 16;
-/*  const int npts = N_BPM_POINTS_TBT; */
-  const int npts = 1024;
-  return get_bpm_data(dbuf, index, nelem, npts);
+  const int nelem = LEN_BPM_DAT_UNIT_TBT / sizeof(int32_t);
+  const int npts = N_BPM_POINTS_TBT;
+  void* dbuf[N_DMA_BUF];
+  PyObject* data;
+  PyArrayObject* data_tbt;
+  if(!PyArg_ParseTuple(args, "Oi", &data, &ch)){
+    return NULL;
+  }
+  if(check_bpm_ch(ch)){
+    return NULL;
+  }
+  get_tuple_ptr(dbuf, data);
+  data_tbt = get_bpm_data((const int32_t*)dbuf[index[ch]], nelem, npts);
+  return Py_BuildValue("iO", status, data_tbt);
 }
 
-static PyArrayObject* get_fa_data(const void* dbuf[]){
+static PyObject* mmeadc01b_get_fa_data(PyObject* self, PyObject* args){
+  int status=0, ch;
   const int index[N_BPM_CH] = {BPM_CH_1_FA, BPM_CH_2_FA};
-  const int nelem = 16;
-/*  const int npts = N_BPM_POINTS_FA; */
-  const int npts = 1024;
-  return get_bpm_data(dbuf, index, nelem, npts);
+  const int nelem = LEN_BPM_DAT_UNIT_FA / sizeof(int32_t);
+  const int npts = N_BPM_POINTS_FA;
+  void* dbuf[N_DMA_BUF];
+  PyObject* data;
+  PyArrayObject* data_fa;
+  if(!PyArg_ParseTuple(args, "Oi", &data, &ch)){
+    return NULL;
+  }
+  if(check_bpm_ch(ch)){
+    return NULL;
+  }
+  get_tuple_ptr(dbuf, data);
+  data_fa = get_bpm_data((const int32_t*)dbuf[index[ch]], nelem, npts);
+  return Py_BuildValue("iO", status, data_fa);
 }
 
-static PyArrayObject* get_sa_data(const void* dbuf[]){
+static PyObject* mmeadc01b_get_sa_data(PyObject* self, PyObject* args){
+  int status=0, ch;
   const int index[N_BPM_CH] = {BPM_CH_1_SA, BPM_CH_2_SA};
-  const int nelem = 32;
-/*  const int npts = N_BPM_POINTS_SA; */
-  const int npts = 256;
-  return get_bpm_data(dbuf, index, nelem, npts);
+  const int nelem = LEN_BPM_DAT_UNIT_SA / sizeof(int32_t);
+  const int npts = N_BPM_POINTS_SA;
+  void* dbuf[N_DMA_BUF];
+  PyObject* data;
+  PyArrayObject* data_sa;
+  if(!PyArg_ParseTuple(args, "Oi", &data, &ch)){
+    return NULL;
+  }
+  if(check_bpm_ch(ch)){
+    return NULL;
+  }
+  get_tuple_ptr(dbuf, data);
+  data_sa = get_bpm_data((const int32_t*)dbuf[index[ch]], nelem, npts);
+  return Py_BuildValue("iO", status, data_sa);
 }
 
-static PyArrayObject* get_sp_data(const void* dbuf[]){
-  int i, j, k, l;
-  const int ND = 4;
-  const int IDX[N_BPM_CH] = {BPM_CH_1_SP_1, BPM_CH_2_SP_1};
-  const int N_MASK = N_MMEADC01B_SP_MASK;
-  const int N_ELEM = 8;
-/*  const int N_PTS = N_BPM_POINTS_SP; */
-  const int N_PTS = 256;
-  /* N_BPM_CH = 2 */
-  /* N_BPM_SP_AREAS = 4 */
-  npy_intp dims[/*ND*/] = {N_BPM_CH, N_MASK, N_ELEM, N_PTS};
-  PyArrayObject* data;
-  data = (PyArrayObject*)PyArray_SimpleNew(ND, dims, NPY_FLOAT32);
-  for(i=0; i<N_BPM_CH; i++){
-    const int* p1 = dbuf[IDX[i]];
-    for(j=0; j<N_MASK; j++){
-      for(k=0; k<N_ELEM; k++){
-        for(l=0; l<N_PTS; l++){
-/*          const int* p1 = dbuf[IDX[i]+(size_t)(l*N_BPM_SP_AREAS/N_MASK/N_ELEM)]; */
-          float* p2 = (float*)PyArray_GETPTR4(data, (npy_intp)i, (npy_intp)j, (npy_intp)k, (npy_intp)l);
-/*          size_t idx = (j%(N_MASK/N_BPM_SP_AREAS))*N_ELEM*N_PTS+l*N_ELEM*N_MASK+k; */
-          size_t idx = l*N_ELEM*N_MASK+k;
+static PyObject* mmeadc01b_get_sp_data(PyObject* self, PyObject* args){
+  int status=0, ch, block;
+  const int ND = 3;
+  const int index[N_BPM_CH] = {BPM_CH_1_SP_1, BPM_CH_2_SP_1};
+  const int nmask = N_MMEADC01B_SP_MASK;
+  const int nelem = LEN_BPM_DAT_UNIT_SA / sizeof(int32_t) / nmask;
+  const int npts = N_BPM_POINTS_SP / N_BPM_SP_BLOCKS;
+  void* dbuf[N_DMA_BUF];
+  npy_intp dims[/*ND*/] = {nmask, nelem, npts};
+  PyObject* data;
+  PyArrayObject* data_sp;
+  if(!PyArg_ParseTuple(args, "Oii", &data, &ch, &block)){
+    return NULL;
+  }
+  if(check_bpm_ch(ch)){
+    return NULL;
+  }
+  if(check_sp_block(block)){
+    return NULL;
+  }
+  data_sp = (PyArrayObject*)PyArray_SimpleNew(ND, dims, NPY_FLOAT32);
+  get_tuple_ptr(dbuf, data);
+  {
+    int i, j, k;
+    const int* p1 = dbuf[index[ch]+block];
+    for(i=0; i<nmask; i++){
+      for(j=0; j<nelem; j++){
+        for(k=0; k<npts; k++){
+          float* p2 = (float*)PyArray_GETPTR3(data_sp, (npy_intp)i, (npy_intp)j, (npy_intp)k);
+          size_t idx = k*nelem*nmask+i*nelem+j;
           *p2 = (float)INT24_TO_INT32(p1[idx]);
         }
       }
     }
   }
-  return data;
-}
-
-static PyObject* mmeadc01b_get_bpm_data(PyObject* self, PyObject* args){
-  int status=0;
-  void* dbuf[N_DMA_BUF];
-  PyObject* data;
-  PyArrayObject* data_tbt;
-  PyArrayObject* data_fa;
-  PyArrayObject* data_sa;
-  PyArrayObject* data_sp;
-  if(!PyArg_ParseTuple(args, "O", &data)){
-    return NULL;
-  }
-  get_tuple_ptr(dbuf, data);
-  data_tbt = get_tbt_data((const void**)dbuf);
-  data_fa = get_fa_data((const void**)dbuf);
-  data_sa = get_sa_data((const void**)dbuf);
-  data_sp = get_sp_data((const void**)dbuf);
-  return Py_BuildValue("iOOOO", status, data_tbt, data_fa, data_sa, data_sp);
-}
-
-static PyObject* mmeadc01b_get_tbt_data(PyObject* self, PyObject* args){
-  int status=0;
-  void* dbuf[N_DMA_BUF];
-  PyObject* data;
-  PyArrayObject* data_tbt;
-  if(!PyArg_ParseTuple(args, "O", &data)){
-    return NULL;
-  }
-  get_tuple_ptr(dbuf, data);
-  data_tbt = get_tbt_data((const void**)dbuf);
-  return Py_BuildValue("iO", status, data_tbt);
-}
-
-static PyObject* mmeadc01b_get_fa_data(PyObject* self, PyObject* args){
-  int status=0;
-  void* dbuf[N_DMA_BUF];
-  PyObject* data;
-  PyArrayObject* data_fa;
-  if(!PyArg_ParseTuple(args, "O", &data)){
-    return NULL;
-  }
-  get_tuple_ptr(dbuf, data);
-  data_fa = get_fa_data((const void**)dbuf);
-  return Py_BuildValue("iO", status, data_fa);
-}
-
-static PyObject* mmeadc01b_get_sa_data(PyObject* self, PyObject* args){
-  int status=0;
-  void* dbuf[N_DMA_BUF];
-  PyObject* data;
-  PyArrayObject* data_sa;
-  if(!PyArg_ParseTuple(args, "O", &data)){
-    return NULL;
-  }
-  get_tuple_ptr(dbuf, data);
-  data_sa = get_sa_data((const void**)dbuf);
-  return Py_BuildValue("iO", status, data_sa);
-}
-
-static PyObject* mmeadc01b_get_sp_data(PyObject* self, PyObject* args){
-  int status=0;
-  void* dbuf[N_DMA_BUF];
-  PyObject* data;
-  PyArrayObject* data_sp;
-  if(!PyArg_ParseTuple(args, "O", &data)){
-    return NULL;
-  }
-  get_tuple_ptr(dbuf, data);
-  data_sp = get_sp_data((const void**)dbuf);
   return Py_BuildValue("iO", status, data_sp);
 }
 
@@ -716,7 +703,6 @@ static PyMethodDef mmeadc01b_methods[] = {
   {"get_waveform", mmeadc01b_get_waveform, METH_VARARGS, "Get ADC and IQ waveform data."},
   {"get_waveform_tone", mmeadc01b_get_waveform_tone, METH_VARARGS, "Get calibration tone waveform data."},
   {"get_waveform_sp", mmeadc01b_get_waveform_sp, METH_VARARGS, "Get SP waveform data."},
-  {"get_bpm_data", mmeadc01b_get_bpm_data, METH_VARARGS, "Get all BPM data."},
   {"get_tbt_data", mmeadc01b_get_tbt_data, METH_VARARGS, "Get TBT BPM data."},
   {"get_fa_data", mmeadc01b_get_fa_data, METH_VARARGS, "Get FA BPM data."},
   {"get_sa_data", mmeadc01b_get_sa_data, METH_VARARGS, "Get SA BPM data."},

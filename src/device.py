@@ -9,10 +9,19 @@ import pandas as pd
 
 NCH = 10
 NFIR = 17
+NBPM = 2
+NSPMASK = 4
+NSPAREA = 4
 
 META = ["ADC_WFM", "IQ_WFM", "SP_WFM", "CT_L", "CT_H",
         "BPM1TBT", "BPM1FA", "BPM1SA", "BPM1SP",
         "BPM2TBT", "BPM2FA", "BPM2SA", "BPM2SP"]
+
+DMA_REQ_WFM = 1
+DMA_REQ_TBT = [1<<8, 1<<16]
+DMA_REQ_FA = [1<<9, 1<<17]
+DMA_REQ_SA = [1<<10, 1<<18]
+DMA_REQ_SP = [[1<<(i+11) for i in range(NSPAREA)], [1<<(i+19) for i in range(NSPAREA)]]
 
 class Device:
     """ MMEADC01B Device class """
@@ -246,6 +255,8 @@ class Device:
     def wfm_get(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmapped.")
+        meta = self.get_meta()
+        self.start_dma_xfer(DMA_REQ_WFM, meta["ADC_WFM"]["idx_latest"])
         status, adc, iq = devapi.get_waveform(self.dmabuf)
         status, sp = devapi.get_waveform_sp(self.dmabuf)
         return adc, iq, sp
@@ -374,74 +385,93 @@ class Device:
     def get_tbt_data(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
-        status, data = devapi.get_tbt_data(self.dmabuf)
         ret = []
-        for i in range(2):
+        meta = self.get_meta()
+        for i in range(NBPM):
+            idx = meta["BPM{}TBT".format(i+1)]["idx_latest"]
+            self.start_dma_xfer(DMA_REQ_TBT[i], idx)
+            status, data = devapi.get_tbt_data(self.dmabuf, i)
             tmp = {}
-            tmp['x'] = data[i,0,:]
-            tmp['y'] = data[i,1,:]
+            tmp['x'] = data[0,:]
+            tmp['y'] = data[1,:]
             for j in range(4):
-                tmp['v{}'.format(j+1)] = data[i,2+j,:]
-            tmp['sum'] = data[i,6,:]+1.j*data[i,7,:]
-            tmp['ref'] = data[i,8,:]+1.j*data[i,9,:]
-            for j in range(10,16):
-                tmp['rsv{}'.format(j+1)] = data[i,j,:]
+                tmp['v{}'.format(j+1)] = data[2+j,:]
+            tmp['sum'] = data[6,:]+1.j*data[7,:]
+            tmp['ref'] = data[8,:]+1.j*data[9,:]
+            #for j in range(10,16):
+            #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
         return ret
     def get_fa_data(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
-        status, data = devapi.get_fa_data(self.dmabuf)
         ret = []
-        for i in range(2):
+        meta = self.get_meta()
+        for i in range(NBPM):
+            idx = meta["BPM{}FA".format(i+1)]["idx_latest"]
+            self.start_dma_xfer(DMA_REQ_FA[i], idx)
+            status, data = devapi.get_fa_data(self.dmabuf, i)
             tmp = {}
-            tmp['x'] = data[i,0,:]
-            tmp['y'] = data[i,1,:]
+            tmp['x'] = data[0,:]
+            tmp['y'] = data[1,:]
             for j in range(4):
-                tmp['v{}'.format(j+1)] = data[i,2+j,:]
-            tmp['sum'] = data[i,6,:]+1.j*data[i,7,:]
-            tmp['ref'] = data[i,8,:]+1.j*data[i,9,:]
-            tmp['x3'] = data[i,10,:]
-            tmp['y3'] = data[i,11,:]
-            for j in range(12,16):
-                tmp['rsv{}'.format(j+1)] = data[i,j,:]
+                tmp['v{}'.format(j+1)] = data[2+j,:]
+            tmp['sum'] = data[6,:]+1.j*data[7,:]
+            tmp['ref'] = data[8,:]+1.j*data[9,:]
+            tmp['x3'] = data[10,:]
+            tmp['y3'] = data[11,:]
+            #for j in range(12,16):
+            #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
         return ret
     def get_sa_data(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
-        status, data = devapi.get_sa_data(self.dmabuf)
         ret = []
-        for i in range(2):
+        meta = self.get_meta()
+        for i in range(NBPM):
+            idx = meta["BPM{}SA".format(i+1)]["idx_latest"]
+            self.start_dma_xfer(DMA_REQ_SA[i], idx)
+            status, data = devapi.get_sa_data(self.dmabuf, i)
             tmp = {}
-            tmp['x'] = data[i,0,:]
-            tmp['y'] = data[i,1,:]
+            tmp['x'] = data[0,:]
+            tmp['y'] = data[1,:]
             for j in range(4):
-                tmp['v{}'.format(j+1)] = data[i,2+j,:]
-            tmp['sum'] = data[i,6,:]+1.j*data[i,7,:]
-            tmp['ref'] = data[i,8,:]+1.j*data[i,9,:]
+                tmp['v{}'.format(j+1)] = data[2+j,:]
+            tmp['sum'] = data[6,:]+1.j*data[7,:]
+            tmp['ref'] = data[8,:]+1.j*data[9,:]
             for j in range(4):
-                tmp['x{}'.format(j+1)] = data[i,10+j*2,:]
-                tmp['y{}'.format(j+1)] = data[i,11+j*2,:]
-            for j in range(18,32):
-                tmp['rsv{}'.format(j+1)] = data[i,j,:]
+                tmp['x{}'.format(j+1)] = data[10+j*2,:]
+                tmp['y{}'.format(j+1)] = data[11+j*2,:]
+            #for j in range(18,32):
+            #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
         return ret
     def get_sp_data(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
-        status, data = devapi.get_sp_data(self.dmabuf)
         sp = []
-        for i in range(2):
+        meta = self.get_meta()
+        for i in range(NBPM):
+            idx = meta["BPM{}SP".format(i+1)]["idx_latest"]
+            area = []
+            for j in range(NSPAREA):
+                self.start_dma_xfer(DMA_REQ_SP[i][j], idx)
+                status, data = devapi.get_sp_data(self.dmabuf, i, j)
+                mask = []
+                for k in range(NSPMASK):
+                    tmp = {}
+                    tmp['x'] = data[k,0,:]
+                    tmp['y'] = data[k,1,:]
+                    for l in range(4):
+                        tmp['v{}'.format(l+1)] = data[k,2+l,:]
+                    tmp['sum'] = data[k,6,:]+1.j*data[k,7,:]
+                    mask.append(pd.DataFrame(tmp))
+                area.append(mask)
             mask = []
-            for j in range(8):
-                tmp = {}
-                tmp['x'] = data[i,j,0,:]
-                tmp['y'] = data[i,j,1,:]
-                for k in range(4):
-                    tmp['v{}'.format(k+1)] = data[i,j,2+k,:]
-                tmp['sum'] = data[i,j,6,:]+1.j*data[i,j,7,:]
-                mask.append(pd.DataFrame(tmp))
+            for j in range(NSPMASK):
+                tmp = [area[k][j] for k in range(NSPAREA)]
+                mask.append(pd.concat(tmp, ignore_index=True))
             sp.append(mask)
         return sp
 
