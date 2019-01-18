@@ -17,6 +17,6 @@ setup(name="mmeadc01b",
                 packages=["mmeadc01b"],
                 package_dir={"mmeadc01b":"src"},
                 package_data={"mmeadc01b": ["regdata.txt","errordata.txt",
-                        "bitinfo.json"]},
+                        "bitinfo.json", "regadc.json"]},
                 ext_modules = [ext_devapi])
 

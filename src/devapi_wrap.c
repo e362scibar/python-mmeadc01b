@@ -277,6 +277,7 @@ static PyObject* mmeadc01b_adc_write(PyObject* self, PyObject* args){
   }
   num = get_tuple(wbuf, data);
   if(num <= 0){
+    PyErr_SetString(PyExc_TypeError, "No Data.");
     return NULL;
   }
   status = dev_mmeadc01b_adc_write(fd, id_adc, addr, num, wbuf);
@@ -305,6 +306,7 @@ static PyObject* mmeadc01b_dac_write(PyObject* self, PyObject* args){
   }
   num = get_tuple(wbuf, data);
   if(num <= 0){
+    PyErr_SetString(PyExc_TypeError, "No Data.");
     return NULL;
   }
   status = dev_mmeadc01b_dac_write(fd, addr, num, wbuf);

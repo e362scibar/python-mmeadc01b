@@ -1,0 +1,524 @@
+{
+  "CONFIG_A": {
+    "address": "0x0000",
+    "length": 1,
+    "default": "0x3C",
+    "description": null,
+    "bit": {
+      "SR": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Setting this soft reset bit causes all registers to be reset to their default state. This bit is self-clearing."
+      },
+      "RSV1": {
+        "offset": 6,
+        "length": 1,
+        "writable": true,
+        "description": "Reserved and must be written with 0."
+      },
+      "ASCEND": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Order of address change during streaming reads or writes. 0 : Address is decremented during streaming reads or writes. 1 : Address is incremented during streaming reads or writes (default)."
+      },
+      "RSV0": {
+        "offset": 4,
+        "length": 1,
+        "writable": false,
+        "description": "Reserved and must be written with 1."
+      },
+      "PAL": {
+        "offset": 0,
+        "length": 4,
+        "writable": false,
+        "description": "Palindrome bits are bit 3 = bit 4, bit 2 = bit 5, bit 1 = bit 6, and bit 0 = bit 7."
+      }
+    }
+  },
+  "DEVICE_CONFIG": {
+    "address": "0x0002",
+    "length": 1,
+    "default": "0x00",
+    "description": null,
+    "bit": {
+      "RSV": {
+        "offset": 2,
+        "length": 6,
+        "writable": true,
+        "description": "Reserved and must be written with 000000."
+      },
+      "PD_MODE": {
+        "offset": 0,
+        "length": 2,
+        "writable": true,
+        "description": "Power-down mode. 00 : Normal operation (default). 01 : Reserved. 10 : Sleep operation (faster resume). 11 : Power-down (slower resume)"
+      }
+    }
+  },
+  "CHIP_TYPE": {
+    "address": "0x0003",
+    "length": 1,
+    "default": "0x03",
+    "description": null,
+    "bit": {
+      "RSV": {
+        "offset": 4,
+        "length": 4,
+        "writable": true,
+        "description": "Reserved and must be written with 0000."
+      },
+      "CHIP_TYPE": {
+        "offset": 0,
+        "length": 4,
+        "writable": false,
+        "description": "Chip type that always returns 0x3, indicating that the part is a high-speed ADC."
+      }
+    }
+  },
+  "CHIP_ID": {
+    "address": "0x0004",
+    "length": 2,
+    "default": "0x0002",
+    "description": null,
+    "bit": {
+      "CHIP_ID": {
+        "offset": 0,
+        "length": 16,
+        "writable": false,
+        "description": "Chip ID."
+      }
+    }
+  },
+  "CHIP_VERSION": {
+    "address": "0x0006",
+    "length": 1,
+    "default": "0x01",
+    "description": null,
+    "bit": {
+      "CHIP_VERSION": {
+        "offset": 0,
+        "length": 8,
+        "writable": false,
+        "description": "Chip version."
+      }
+    }
+  },
+  "VENDOR_ID": {
+    "address": "0x000C",
+    "length": 2,
+    "default": "0x0451",
+    "description": null,
+    "bit": {
+      "CHIP_VERSION": {
+        "offset": 0,
+        "length": 16,
+        "writable": false,
+        "description": "Vendor ID. Texas Instruments vendor ID is 0x0451."
+      }
+    }
+  },
+  "SPI_CFG": {
+    "address": "0x0010",
+    "length": 1,
+    "default": "0x01",
+    "description": null,
+    "bit": {
+      "RSV": {
+        "offset": 2,
+        "length": 6,
+        "writable": true,
+        "description": "Reserved and must be written with 000000."
+      },
+      "VSPI": {
+        "offset": 0,
+        "length": 2,
+        "writable": true,
+        "description": "SPI logic level controls the SDO output logic level. 00 : 1.2 V. 01 : 3 V (default). 10 : 2.5 V. 11 : 1.8 V. This register must be configured (written) before making a read command with a SPI that is not a 3-V logic level. The SPI inputs (SDI, SCLK, and CSb) are compatible with logic levels ranging from 1.2 to 3 V."
+      }
+    }
+  },
+  "OM1": {
+    "address": "0x0012",
+    "length": 1,
+    "default": "0x81",
+    "description": "Operational Mode 1",
+    "bit": {
+      "DF": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Output data format. 0 : Offset binary. 1 : Signed 2s complement (default)."
+      },
+      "RSV1": {
+        "offset": 5,
+        "length": 2,
+        "writable": true,
+        "description": "Reserved and must be written with 00."
+      },
+      "IDLE": {
+        "offset": 3,
+        "length": 2,
+        "writable": true,
+        "description": "SYSREF idle state offset configuration. 00 : No offset applied (default). 01 : SYSREF idles low (de-asserted) with –400-mV offset. 10 : SYSREF idles high (asserted) with +400-mV offset. 11 : Reserved."
+      },
+      "SYS_EN": {
+        "offset": 2,
+        "length": 1,
+        "writable": true,
+        "description": "SYSREF detection gate enable. 0 : SYSREF gate is disabled; (input is ignored, default). 1 : SYSREF gate is enabled."
+      },
+      "RSV0": {
+        "offset": 0,
+        "length": 2,
+        "writable": true,
+        "description": "Reserved and must be written with 01."
+      }
+    }
+  },
+  "OM2": {
+    "address": "0x0013",
+    "length": 1,
+    "default": "0x40",
+    "description": "Operational Mode 2",
+    "bit": {
+      "RSV1": {
+        "offset": 5,
+        "length": 3,
+        "writable": true,
+        "description": "Reserved and must be written with 010."
+      },
+      "CLKDIV": {
+        "offset": 3,
+        "length": 2,
+        "writable": true,
+        "description": "Clock divider ratio. Sets the value of the clock divide factor, CLKDIV. 00 : Divide by 1, CLKDIV = 1 (default). 01 : Divide by 2, CLKDIV = 2. 10 : Divide by 4, CLKDIV = 4. 11 : Divide by 8, CLKDIV = 8."
+      },
+      "RSV0": {
+        "offset": 0,
+        "length": 3,
+        "writable": true,
+        "description": "Reserved and must be written with 000."
+      }
+    }
+  },
+  "IMB_ADJ_A": {
+    "address": "0x0014",
+    "length": 1,
+    "default": "0x00",
+    "description": "Imbalance Adjust, Channel A",
+    "bit": {
+      "RSV": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Reserved and must be written with 0."
+      },
+      "AMPADJ_A": {
+        "offset": 4,
+        "length": 3,
+        "writable": true,
+        "description": "Analog input amplitude imbalance correction for channel A. 7 = +30 Ω VIN+, –30 Ω VIN–. 6 = +20 Ω VIN+, –20 Ω VIN–. 5 = +10 Ω VIN+, –10 Ω VIN–. 4 = Reserved. 3 = –30 Ω VIN+, +30 Ω VIN–. 2 = –20 Ω VIN+, +20 Ω VIN–. 1 = –10 Ω VIN+, +10 Ω VIN–. 0 = +0 Ω VIN+, –0 Ω VIN– (default). Resistance changes indicate variation of the internal single-ended termination."
+      },
+      "PHAADJ_A": {
+        "offset": 0,
+        "length": 4,
+        "writable": true,
+        "description": "Analog input phase imbalance correction for channel A. 15 = +1.68 pF VIN–. ... 9 = +0.48 pF VIN–. 8 = +0.24 pF VIN–. 7 = +1.68 pF VIN+. ... 2 = +0.48 pF VIN+. 1 = +0.24 pF VIN+. 0 = +0 pF VIN+, +0 pF VIN– (default). Capacitance changes indicate the addition of internal capacitive load on the given pin."
+      }
+    }
+  },
+  "IMB_ADJ_B": {
+    "address": "0x0015",
+    "length": 1,
+    "default": "0x00",
+    "description": "Imbalance Adjust, Channel B",
+    "bit": {
+      "RSV": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Reserved and must be written with 0."
+      },
+      "AMPADJ_A": {
+        "offset": 4,
+        "length": 3,
+        "writable": true,
+        "description": "Analog input amplitude imbalance correction for channel B. 7 = +30 Ω VIN+, –30 Ω VIN–. 6 = +20 Ω VIN+, –20 Ω VIN–. 5 = +10 Ω VIN+, –10 Ω VIN–. 4 = Reserved. 3 = –30 Ω VIN+, +30 Ω VIN–. 2 = –20 Ω VIN+, +20 Ω VIN–. 1 = –10 Ω VIN+, +10 Ω VIN–. 0 = +0 Ω VIN+, –0 Ω VIN– (default). Resistance changes indicate variation of the internal single-ended termination."
+      },
+      "PHAADJ_A": {
+        "offset": 0,
+        "length": 4,
+        "writable": true,
+        "description": "Analog input phase imbalance correction for channel B. 15 = +1.68 pF VIN–. ... 9 = +0.48 pF VIN–. 8 = +0.24 pF VIN–. 7 = +1.68 pF VIN+. ... 2 = +0.48 pF VIN+. 1 = +0.24 pF VIN+. 0 = +0 pF VIN+, +0 pF VIN– (default). Capacitance changes indicate the addition of internal capacitive load on the given pin."
+      }
+    }
+  },
+  "CDLY_CTRL": {
+    "address": "0x0019",
+    "length": 1,
+    "default": "0x00",
+    "description": "Coarse Delay Control",
+    "bit": {
+      "RSV": {
+        "offset": 5,
+        "length": 3,
+        "writable": true,
+        "description": "Reserved and must be written with 000."
+      },
+      "CDLY_EN": {
+        "offset": 4,
+        "length": 1,
+        "writable": true,
+        "description": "Coarse sampling clock phase delay enable. 0 : Coarse clock delay disabled (default). 1 : Coarse clock delay enabled. Coarse delay is not supported when the divide ratio is set to 1 (CLKDIV = 00)."
+      },
+      "CRS_DLY": {
+        "offset": 0,
+        "length": 4,
+        "writable": true,
+        "description": "Coarse sampling clock phase delay adjust. Adjusts the ADC clock delay in coarse increments. The step size is one-half of the CLKIN input period. For details, see data sheet."
+      }
+    }
+  },
+  "OVR_HOLD": {
+    "address": "0x003B",
+    "length": 1,
+    "default": "0x00",
+    "description": "Over-Range Hold",
+    "bit": {
+      "RSV": {
+        "offset": 2,
+        "length": 6,
+        "writable": true,
+        "description": "Reserved and must be written with 000000."
+      },
+      "OVR_HOLD": {
+        "offset": 0,
+        "length": 2,
+        "writable": true,
+        "description": "Over-range hold function. In the event of an input signal larger than the full-scale range, an over-range event occurs and the over-range indicators are asserted. OVR_HOLD determines the amount of time the over-range indicators remain asserted after the input signal has reduced below full-scale. 00 : OVR indicator extended by +0 clock cycles (default). 01 : OVR indicator extended by +3 clock cycles. 10 : OVR indicator extended by +7 clock cycles. 11 : OVR indicator extended by +15 clock cycles."
+      }
+    }
+  },
+  "OVR_TH": {
+    "address": "0x003C",
+    "length": 1,
+    "default": "0x00",
+    "description": "Over-Range Threshold",
+    "bit": {
+      "OVR_TH": {
+        "offset": 0,
+        "length": 8,
+        "writable": true,
+        "description": "Over-range threshold. This field is an unsigned value from 0 to 255. OVR_TH sets the over-range detection thresholds for the ADC. If the 16-bit signed data exceeds the thresholds, then the over-range bit is set. The 16-bit thresholds are ± OVR_TH × 128 codes from the low and high full-scale codes (32767 and –32768 in signed 2s complement). If OVR_TH is 0, then the default threshold is used (full scale)."
+      }
+    }
+  },
+  "DC_MODE": {
+    "address": "0x003D",
+    "length": 1,
+    "default": "0x00",
+    "description": "DC Offset Correction Mode",
+    "bit": {
+      "RSV": {
+        "offset": 3,
+        "length": 5,
+        "writable": true,
+        "description": "Reserved and must be written with 000000."
+      },
+      "TC_DC": {
+        "offset": 1,
+        "length": 2,
+        "writable": true,
+        "description": "DC offset filter time constant. The time constant determines the filter bandwidth of the DC high-pass filter. For details, see data sheet."
+      },
+      "DC_EN": {
+        "offset": 0,
+        "length": 1,
+        "writable": true,
+        "description": "DC offset correction enable. 0 : Disable DC offset correction. 1 : Enable DC offset correction."
+      }
+    }
+  },
+  "SER_CFG": {
+    "address": "0x0047",
+    "length": 1,
+    "default": "0x00",
+    "description": "Serial Lane Transmitter Configuration",
+    "bit": {
+      "RSV1": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Reserved and must be written with 0."
+      },
+      "VOD": {
+        "offset": 4,
+        "length": 3,
+        "writable": true,
+        "description": "Serial-lane transmitter driver output differential peak-to-peak voltage amplitude. 000 : 0.580 V (default). 001 : 0.680 V. 010 : 0.760 V. 011 : 0.860 V. 100 : 0.960 V. 101 : 1.060 V. 110 : 1.140 V. 111 : 1.240 V. Reported voltage values are nominal values at low-lane rates with de-emphasis disabled."
+      },
+      "RSV0": {
+        "offset": 3,
+        "length": 1,
+        "writable": true,
+        "description": "Reserved and must be written with 0."
+      },
+      "DEM": {
+        "offset": 0,
+        "length": 3,
+        "writable": true,
+        "description": "Serial lane transmitted de-emphasis. 000 : 0 dB. 001 : –0.4 dB. 010 : –1.2 dB. 011 : –2.1 dB. 100 : –2.8 dB. 101 : –3.8 dB. 110 : –4.8 dB. 111 –6.8 dB."
+      }
+    }
+  },
+  "JESD_CTRL1": {
+    "address": "0x0060",
+    "length": 1,
+    "default": "0x7D",
+    "description": "JESD Configuration Control 1",
+    "bit": {
+      "SCR_EN": {
+        "offset": 7,
+        "length": 1,
+        "writable": true,
+        "description": "Scrambler enable. 0 : Disabled (default). 1 : Enabled. Note: JESD_EN must be set to 0 before altering this field."
+      },
+      "K_M1": {
+        "offset": 2,
+        "length": 5,
+        "writable": true,
+        "description": "Number of frames per multi-frame, K – 1. The binary values of K_M1 represent the value (K – 1). 00000 : Reserved. 00001 : Reserved. ... 00111 : Reserved. 01000 : K = 9. ... 11111 : K = 32 (default). Note: In single-lane mode, K must be in the range 9 to 32. Values outside this range are either reserved or may produce unexpected results. In dual-lane mode, K must be in the range 17 to 32. Values outside this range are either reserved or may produce unexpected results. JESD_EN must be set to 0 before altering this field."
+      },
+      "L_M1": {
+        "offset": 1,
+        "length": 1,
+        "writable": true,
+        "description": "Number of serial lanes used per channel, L – 1. The binary value of L_M1 represents the value (L – 1). 0 : Single-lane mode (L = 1) (default). 1 : Dual-lane mode (L = 2). Note: If dual-lane mode is selected (L_M1 = 1) then K_M1 must be updated accordingly. JESD_EN must be set to 0 before altering this field."
+      },
+      "JESD_EN": {
+        "offset": 0,
+        "length": 1,
+        "writable": true,
+        "description": "JESD204B link enable. When enabled, the JESD204B link synchronizes and transfers data normally. When the link is disabled, the serial transmitters output a repeating, alternating 01010101 stream. 0 : Disabled. 1 : Enabled (default)."
+      }
+    }
+  },
+  "JESD_CTRL2": {
+    "address": "0x0061",
+    "length": 1,
+    "default": "0x00",
+    "description": "JESD Configuration Control 2",
+    "bit": {
+      "RSV": {
+        "offset": 4,
+        "length": 4,
+        "writable": true,
+        "description": "Reserved and must be written with 0000."
+      },
+      "JESD_TEST_MODES": {
+        "offset": 0,
+        "length": 4,
+        "writable": true,
+        "description": "JESD204B test modes. 0000 : Test mode disabled. Normal operation (default). 0001 : PRBS7 test mode. 0010 : PRBS15 test mode. 0011 : PRBS23 test mode. 0100 : RESERVED. 0101 : ILA test mode. 0110 : Ramp test mode. 0111 : K28.5 test mode. 1000 : D21.5 test mode. 1001: Logic low test mode (serial outputs held low). 1010: Logic high test mode (serial outputs held high). 1011 – 1111 : Reserved. Note: JESD_EN must be set to 0 before altering this field."
+      }
+    }
+  },
+  "JESD_RSTEP": {
+    "address": "0x0062",
+    "length": 2,
+    "default": "0x0001",
+    "description": "JESD Ramp Pattern Step",
+    "bit": {
+      "JESD_RSTEP": {
+        "offset": 0,
+        "length": 16,
+        "writable": true,
+        "description": "JESD204B ramp test mode step. The binary value JESD_RSTEP[15:0] corresponds to the step of the ramp mode step. A value of 0x0000 is not allowed. Note: JESD_EN must be set to 0 before altering this field."
+      }
+    }
+  },
+  "JESD_STATUS": {
+    "address": "0x006C",
+    "length": 1,
+    "default": null,
+    "description": "JESD Link Status",
+    "bit": {
+      "RSV": {
+        "offset": 7,
+        "length": 1,
+        "writable": false,
+        "description": "Reserved."
+      },
+      "LINK": {
+        "offset": 6,
+        "length": 1,
+        "writable": false,
+        "description": "JESD204B link status. This bit is set when synchronization is finished, transmission of the ILA sequence is complete, and valid data is being transmitted. 0 : Link not established. 1 : Link established and valid data transmitted."
+      },
+      "SYNC": {
+        "offset": 5,
+        "length": 1,
+        "writable": false,
+        "description": "JESD204B link synchronization request status This bit is cleared when a synchronization request is received at the SYNCb input. 0 : Synchronization request received at the SYNCb input and synchronization is in progress. 1 : Synchronization not requested. Note: SYNCb must be asserted for at least four local frame clocks before synchronization is initiated. The SYNC status bit reports the status of synchronization, but does not necessarily report the current status of the signal at the SYNCb input."
+      },
+      "REALIGN": {
+        "offset": 4,
+        "length": 1,
+        "writable": true,
+        "description": "SYSREF re-alignment status. This bit is set when a SYSREF event causes a shift in the phase of the internal frame or LMFC clocks. Note: Write a 1 to REALIGN to clear the bit field to a 0 state. SYSREF events that do not cause a frame or LMFC clock phase adjustment do not set this register bit. If CLK_RDY becomes low, this bit is cleared."
+      },
+      "ALIGN": {
+        "offset": 3,
+        "length": 1,
+        "writable": true,
+        "description": "SYSREF alignment status. This bit is set when the ADC has processed a SYSREF event and indicates that the local frame and multi-frame clocks are now based on a SYSREF event. Note: Write a 1 to ALIGN to clear the bit field to a 0 state. Rising-edge SYSREF event sets ALIGN bit. If CLK_RDY becomes low, this bit is cleared."
+      },
+      "PLL_LOCK": {
+        "offset": 2,
+        "length": 1,
+        "writable": false,
+        "description": "PLL lock status. This bit is set when the PLL has achieved lock. 0 : PLL unlocked. 1 : PLL locked."
+      },
+      "CAL_DONE": {
+        "offset": 1,
+        "length": 1,
+        "writable": false,
+        "description": "ADC calibration status. This bit is set when the ADC calibration is complete. 0 : Calibration currently in progress or not yet completed. 1 : Calibration complete. Note: Calibration must complete before SYSREF detection (SYS_EN) can be enabled. Calibration must complete before the any clock phase delay adjustments are made."
+      },
+      "CLK_RDY": {
+        "offset": 0,
+        "length": 1,
+        "writable": false,
+        "description": "Input clock status. This bit is set when the ADC is powered-up and detects an active clock signal at the CLKIN input. 0 : CLKIN not detected. 1 : CLKIN detected."
+      }
+    }
+  },
+  "DATA_CTRL": {
+    "address": "0x0070",
+    "length": 1,
+    "default": "0x22",
+    "description": null,
+    "bit": {
+      "RSV1": {
+        "offset": 3,
+        "length": 5,
+        "writable": true,
+        "description": "Reserved and must be written with 00100."
+      },
+      "TEST_DATA": {
+        "offset": 2,
+        "length": 1,
+        "writable": true,
+        "description": "ADC test pattern enable. When enabled, data from the ADC core is replaced by test pattern data. The pattern is a 16-bit repeating [0, 26280, 0, –26328] sequence (signed 16-bit number) that appears in the FFT spectrum as a tone, centered at FS / 4, and just below the clipping level. 0 : Disabled ADC test pattern (default). 1 : Enable ADC test pattern. Note: The ADC test pattern function is independent from the test patterns outlined in the JESD_CTRL2 register. The TEST_DATA bit enables a test pattern at the ADC core output, prior to entering the JESD204B core. The JESD_TEST_MODES field enables test patterns within the transport and link layers of the JESD204B core."
+      },
+      "RSV0": {
+        "offset": 0,
+        "length": 2,
+        "writable": true,
+        "description": "Reserved and must be written with 10."
+      }
+    }
+  }
+}

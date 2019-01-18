@@ -2,6 +2,7 @@ from . import devapi
 from .error import Error
 from .register import Register
 from .bitfield import Bitfield
+from .adcreg import AdcRegister
 import ctypes
 import time
 import numpy as np
@@ -91,24 +92,29 @@ class Device:
         status = devapi.write_float(self.fd, reg.bar, reg.ofs, data)
         if status:
             raise Error(status)
-    def adc_read(self, id_adc, addr, num=1):
+    def adc_read(self, id_adc, reg):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        status, data = devapi.adc_read(self.fd, id_adc, addr, num)
+        if isinstance(reg, AdcRegister):
+            r = AdcRegister(reg.name)
+        else:
+            r = AdcRegister(reg)
+        status, data = devapi.adc_read(self.fd, id_adc, r.addr, r.reg["length"])
         if status:
             raise Error(status)
-        if num == 1:
-            return data[0]
-        return data
-    def adc_write(self, id_adc, addr, data):
+        r.value = 0
+        for i in range(r.reg["length"]):
+            r.value |= data[i] << (i*8)
+        return r
+    def adc_write(self, id_adc, reg, data=None):
         if self.fd is None:
             raise RuntimeError("Device not opened.")
-        if not isinstance(data, tuple):
-            if isinstance(data, list):
-                data = tuple(data)
-            else:
-                data = (data,)
-        status = devapi.adc_write(self.fd, id_adc, addr, data)
+        if isinstance(reg, AdcRegister):
+            r = AdcRegister(reg.name, reg.value)
+        else:
+            r = AdcRegister(reg, data)
+        tmp = [(r.value>>(i*8))&0xFF for i in range(r.reg["length"])]
+        status = devapi.adc_write(self.fd, id_adc, r.addr, tuple(tmp))
         if status:
             raise Error(status)
     def dac_read(self, addr, num=1):
