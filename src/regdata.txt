@@ -876,7 +876,7 @@ TONE_CURR_2             4 0x001021E4    # CH6-10
 
 # SA DATA
 COD_SA_BPM1             4 0x00140000    # 128 bytes/point x 256 points
-COD_SA_BPM2             4 0x00140000    # 128 bytes/point x 256 points
+COD_SA_BPM2             4 0x00148000    # 128 bytes/point x 256 points
 
 # SP BPM mask
 #  mask bits assignment each mask (mask 1-8):

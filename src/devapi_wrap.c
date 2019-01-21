@@ -15,10 +15,14 @@
 
 static int check_num(int num){
   if(num > NBUF){
-    printf("N data too large. %d (max %d)\n", num, NBUF);
+    char str[NBUF];
+    sprintf(str, "N data too large. %d (max %d)\n", num, NBUF);
+    PyErr_SetString(PyExc_ValueError, str);
     return 1;
   }else if(num <= 0){
-    printf("number of data is 0 or negative. %d\n", num);
+    char str[NBUF];
+    sprintf(str, "number of data is 0 or negative. %d\n", num);
+    PyErr_SetString(PyExc_ValueError, str);
     return -1;
   }
   return 0;
