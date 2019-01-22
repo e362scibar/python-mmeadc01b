@@ -13,10 +13,14 @@ NFIR = 17
 NBPM = 2
 NSPMASK = 4
 NSPAREA = 4
+NFIRCOD = 20
+NFIRTBT = 15
 
 META = ["ADC_WFM", "IQ_WFM", "SP_WFM", "CT_L", "CT_H",
         "BPM1TBT", "BPM1FA", "BPM1SA", "BPM1SP",
         "BPM2TBT", "BPM2FA", "BPM2SA", "BPM2SP"]
+
+CODMODE = ["TBT", "FA", "SA"]
 
 DMA_REQ_WFM = 1
 DMA_REQ_TBT = [1<<8, 1<<16]
@@ -302,7 +306,7 @@ class Device:
         self.write(Register("FIR_ON"), val)
     def get_fir_coeff(self, ch):
         if ch not in range(NCH):
-            raise ValueError("Channel")
+            raise ValueError("Invalid channel. {}".format(ch))
         self.write(Register("FIR_COEFF_CHSEL"), ch)
         fir = []
         for i in range(NFIR):
@@ -311,18 +315,18 @@ class Device:
         return fir
     def set_fir_coeff(self, ch, coeff=[1]):
         if ch not in range(NCH):
-            raise ValueError("Channel")
+            raise ValueError("Invalid channel. {}".format(ch))
         if len(coeff) < NFIR:
             coeff.reverse().extend([0]*(NFIR-len(coeff))).reverse()
         for i in range(NFIR):
             ival = coeff[i]*2**14
             if ival > 0x7fff:
                 val = 0x7fff
-            elif ival < -0x10000:
-                val = -0x10000
+            elif ival < -0x8000:
+                val = -0x8000
             else:
                 val = int(ival)
-            self.write(Register("FIR_COEFF_{:02d}".format(i)), val)
+            self.write(Register("FIR_COEFF_{:02d}".format(i)), val&0xFFFF)
         self.write(Register("FIR_COEFF_CHSEL"), ch)
         self.write(Register("FIR_COEFF_UPD"), 1)
         time.sleep(0.001)
@@ -480,4 +484,54 @@ class Device:
                 mask.append(pd.concat(tmp, ignore_index=True))
             sp.append(mask)
         return sp
+
+    # COD FIR Filter
+    def get_cod_fir_coeff(self, mode="SA"):
+        fir = []
+        if mode in ("FA", "SA"):
+            n = NFIRCOD
+        elif mode == "TBT":
+            n = NFIRTBT
+        else:
+            raise TypeError("Invalid mode. {}".format(mode))
+        for i in range(n):
+            ret = self.read(Register("COD_FIR_COEFF_{:02d}".format(i)))
+            fir.append(np.int16(ret) / 2**14)
+        return fir
+    def set_cod_fir_coeff(self, mode="SA", ch=0, coeff=[1]):
+        if ch not in range(NCH):
+            raise ValueError("Invalid channel. {}".format(ch))
+        if mode == "SA":
+            n = NFIRCOD
+            strsel = 2
+        elif mode == "FA":
+            n = NFIRCOD
+            strsel = 1
+        elif mode == "TBT":
+            n = NFIRTBT
+            strsel = 0
+        else:
+            raise TypeError("Invalid mode. {}".format(mode))
+        if len(coeff) < n:
+            coeff.reverse().extend([0]*(n-len(coeff))).reverse()
+        for i in range(n):
+            ival = coeff[i]*2**14
+            if ival > 0x7fff:
+                val = 0x7fff
+            elif ival < -0x8000:
+                val = -0x8000
+            else:
+                val = int(ival)
+            self.write(Register("COD_FIR_COEFF_{:02d}".format(i)), val&0xFFFF)
+        self.write(Register("COD_FIR_COEFF_CHSEL"), ch)
+        self.write(Register("COD_FIR_COEFF_STRSEL"), strsel)
+        self.write(Register("COD_FIR_COEFF_UPD"), 1)
+        time.sleep(0.001)
+        self.write(Register("COD_FIR_COEFF_UPD"), 0)
+    def get_cod_fir_sw(self):
+        return Bitfield("COD_FIR", self.read(Register("COD_FIR_ON")))
+    def set_cod_fir_sw(self, arg):
+        if isinstance(arg, Bitfield) and arg.name != "COD_FIR":
+            return TypeError("Invalid Bitfield ({}).".format(arg.name))
+        self.write(Register("COD_FIR_ON"), int(arg))
 
