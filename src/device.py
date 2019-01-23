@@ -327,7 +327,7 @@ class Device:
             elif ival < -0x8000:
                 val = -0x8000
             else:
-                val = int(ival)
+                val = int(round(ival))
             self.write(Register("FIR_COEFF_{:02d}".format(i)), val&0xFFFF)
         self.write(Register("FIR_COEFF_CHSEL"), ch)
         self.write(Register("FIR_COEFF_UPD"), 1)
@@ -404,12 +404,12 @@ class Device:
             self.start_dma_xfer(DMA_REQ_TBT[i], idx)
             status, data = devapi.get_tbt_data(self.dmabuf, i)
             tmp = {}
-            tmp['x'] = data[0,:]
-            tmp['y'] = data[1,:]
+            tmp['x'] = data[0,:] / 2.**20
+            tmp['y'] = data[1,:] / 2.**20
             for j in range(4):
-                tmp['v{}'.format(j+1)] = data[2+j,:]
-            tmp['sum'] = data[6,:]+1.j*data[7,:]
-            tmp['ref'] = data[8,:]+1.j*data[9,:]
+                tmp['v{}'.format(j+1)] = data[2+j,:] / 2.**21
+            tmp['sum'] = (data[6,:] + 1.j*data[7,:]) / 2.**23
+            tmp['ref'] = (data[8,:] + 1.j*data[9,:]) / 2.**21
             #for j in range(10,16):
             #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
@@ -424,14 +424,14 @@ class Device:
             self.start_dma_xfer(DMA_REQ_FA[i], idx)
             status, data = devapi.get_fa_data(self.dmabuf, i)
             tmp = {}
-            tmp['x'] = data[0,:]
-            tmp['y'] = data[1,:]
+            tmp['x'] = data[0,:] / 2.**20
+            tmp['y'] = data[1,:] / 2.**20
             for j in range(4):
-                tmp['v{}'.format(j+1)] = data[2+j,:]
-            tmp['sum'] = data[6,:]+1.j*data[7,:]
-            tmp['ref'] = data[8,:]+1.j*data[9,:]
-            tmp['x3'] = data[10,:]
-            tmp['y3'] = data[11,:]
+                tmp['v{}'.format(j+1)] = data[2+j,:] / 2.**21
+            tmp['sum'] = (data[6,:] + 1.j*data[7,:]) / 2.**23
+            tmp['ref'] = (data[8,:] + 1.j*data[9,:]) / 2.**21
+            tmp['x3'] = data[10,:] / 2.**20
+            tmp['y3'] = data[11,:] / 2.**20
             #for j in range(12,16):
             #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
@@ -446,15 +446,15 @@ class Device:
             self.start_dma_xfer(DMA_REQ_SA[i], idx)
             status, data = devapi.get_sa_data(self.dmabuf, i)
             tmp = {}
-            tmp['x'] = data[0,:]
-            tmp['y'] = data[1,:]
+            tmp['x'] = data[0,:] / 2.**20
+            tmp['y'] = data[1,:] / 2.**20
             for j in range(4):
-                tmp['v{}'.format(j+1)] = data[2+j,:]
-            tmp['sum'] = data[6,:]+1.j*data[7,:]
-            tmp['ref'] = data[8,:]+1.j*data[9,:]
+                tmp['v{}'.format(j+1)] = data[2+j,:] / 2.**21
+            tmp['sum'] = (data[6,:] + 1.j*data[7,:]) / 2.**23
+            tmp['ref'] = (data[8,:] + 1.j*data[9,:]) / 2.**21
             for j in range(4):
-                tmp['x{}'.format(j+1)] = data[10+j*2,:]
-                tmp['y{}'.format(j+1)] = data[11+j*2,:]
+                tmp['x{}'.format(j+1)] = data[10+j*2,:] / 2.**20
+                tmp['y{}'.format(j+1)] = data[11+j*2,:] / 2.**20
             #for j in range(18,32):
             #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
@@ -473,11 +473,11 @@ class Device:
                 mask = []
                 for k in range(NSPMASK):
                     tmp = {}
-                    tmp['x'] = data[k,0,:]
-                    tmp['y'] = data[k,1,:]
+                    tmp['x'] = data[k,0,:] / 2.**20
+                    tmp['y'] = data[k,1,:] / 2.**20
                     for l in range(4):
-                        tmp['v{}'.format(l+1)] = data[k,2+l,:]
-                    tmp['sum'] = data[k,6,:]+1.j*data[k,7,:]
+                        tmp['v{}'.format(l+1)] = data[k,2+l,:] / 2.**21
+                    tmp['sum'] = (data[k,6,:] + 1.j*data[k,7,:]) / 2.**23
                     mask.append(pd.DataFrame(tmp))
                 area.append(mask)
             mask = []
@@ -523,7 +523,7 @@ class Device:
             elif ival < -0x8000:
                 val = -0x8000
             else:
-                val = int(ival)
+                val = int(round(ival))
             self.write(Register("COD_FIR_COEFF_{:02d}".format(i)), val&0xFFFF)
         self.write(Register("COD_FIR_COEFF_CHSEL"), ch)
         self.write(Register("COD_FIR_COEFF_STRSEL"), strsel)
@@ -572,7 +572,7 @@ class Device:
             elif ival < -0x8000:
                 val = -0x8000
             else:
-                val = int(ival)
+                val = int(round(ival))
             self.write(Register("TONE_FIR_COEFF_{:02d}".format(i)), val&0xFFFF)
         self.write(Register("TONE_FIR_CH_SEL"), ch)
         self.write(Register("TONE_FIR_UPD"), 1)
