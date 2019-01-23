@@ -15,6 +15,8 @@ NSPMASK = 4
 NSPAREA = 4
 NFIRCOD = 20
 NFIRTBT = 15
+NTONE = 4
+NFIRTONE = 20
 
 META = ["ADC_WFM", "IQ_WFM", "SP_WFM", "CT_L", "CT_H",
         "BPM1TBT", "BPM1FA", "BPM1SA", "BPM1SP",
@@ -534,4 +536,93 @@ class Device:
         if isinstance(arg, Bitfield) and arg.name != "COD_FIR":
             return TypeError("Invalid Bitfield ({}).".format(arg.name))
         self.write(Register("COD_FIR_ON"), int(arg))
+
+    # Cal. Tone
+    def get_tone_nco(self, ch, fiq=508.58e6*5./28.):
+        if ch not in range(NTONE):
+            raise ValueError("Invalid channel. {}".format(ch))
+        ret = self.read(Register("TONE_NCO_{}_FREQ".format(ch+1)))
+        if ret > 0x7FFFFFFF:
+            ret -= 2**32
+        return fiq * ret / 2**32
+    def set_tone_nco(self, ch, freq, fiq=508.58e6*5./28.):
+        if ch not in range(NTONE):
+            raise ValueError("Invalid channel. {}".format(ch))
+        if freq > fiq*0.5 or freq < -fiq*0.5:
+            raise ValueError("Invalid frequency. {}".format(freq))
+        val = round(freq / fiq * 2**32)
+        if val < 0:
+            val += 2**32
+        self.write(Register("TONE_NCO_{}_FREQ".format(ch+1)), val)
+    def get_tone_fir_coeff(self):
+        fir = []
+        for i in range(NFIRTONE):
+            ret = self.read(Register("TONE_FIR_COEFF_{:02d}".format(i)))
+            fir.append(np.int16(ret) / 2**14)
+        return fir
+    def set_tone_fir_coeff(self, ch=0, coeff=[1]):
+        if ch not in range(NTONE*2):
+            raise ValueError("Invalid channel. {}".format(ch))
+        if len(coeff) < NFIRTONE:
+            coeff.reverse().extend([0]*(NFIRTONE-len(coeff))).reverse()
+        for i in range(NFIRTONE):
+            ival = coeff[i]*2**14
+            if ival > 0x7fff:
+                val = 0x7fff
+            elif ival < -0x8000:
+                val = -0x8000
+            else:
+                val = int(ival)
+            self.write(Register("TONE_FIR_COEFF_{:02d}".format(i)), val&0xFFFF)
+        self.write(Register("TONE_FIR_CH_SEL"), ch)
+        self.write(Register("TONE_FIR_UPD"), 1)
+        time.sleep(0.001)
+        self.write(Register("TONE_FIR_UPD"), 0)
+    def get_tone_fir_sw(self):
+        ret = self.read(Register("TONE_FIR_ON"))
+        return bool(ret&1), bool((ret>>1)&1)
+    def set_tone_fir_sw(self, on1, on2):
+        val = 0
+        if on1:
+            val |= 1
+        if on2:
+            val |= 2
+        self.write(Register("TONE_FIR_ON"), val)
+    def get_tone_sw(self):
+        ret = []
+        for i in range(2):
+            ret.append(self.read(Register("TONE_TX_CTRL_{}".format(i+1))))
+        return bool(ret[0]), bool(ret[1])
+    def set_tone_sw(self, on1, on2):
+        val = [0,0]
+        if on1:
+            val[0] = 1
+        if on2:
+            val[1] = 1
+        for i in range(2):
+            self.write(Register("TONE_TX_CTRL_{}".format(i+1)), val[i])
+    def get_tone_ch_sel(self):
+        ''' 0: cyclic, 1: CH1(6), 2: CH2(7), 3: CH3(8), 4: CH4(9), 5: CH5(10)'''
+        ret = []
+        for i in range(2):
+            ret.append(self.read(Register("TONE_CH_SEL_{}".format(i+1))))
+        return ret[0], ret[1]
+    def set_tone_ch_sel(self, ch1, ch2):
+        if ch1 < 0 or ch1 > 5:
+            raise ValueError("Invalid channel 1. {}".format(ch1))
+        if ch2 < 0 or ch2 > 5:
+            raise ValueError("Invalid channel 2. {}".format(ch2))
+        val = [ch1, ch2]
+        for i in range(2):
+            self.write(Register("TONE_CH_SEL_{}".format(i+1)), val[i])
+    def get_tone_time(self):
+        '''channel switching interval (float) [sec]'''
+        ret = self.read(Register("TONE_TRANS_TIME"))
+        return ret / 10.
+    def set_tone_time(self, t):
+        '''channel switching interval (float) [sec]'''
+        if t < 0.1 or t > 1.5:
+            raise ValueError("Invalid time (0.1 - 1.5). {}".format(t))
+        val = round(t * 10.)
+        self.write(Register("TONE_TRANS_TIME"), val)
 

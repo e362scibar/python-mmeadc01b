@@ -805,22 +805,22 @@ TONE_GAIN3_10           4 0x001020D8
 TONE_GAIN4_10           4 0x001020DC
 
 # CAL Tone FIR filter coefficients
-TONE_FIR_ON             4 0x00102100    # 0: CH1-5, 1: CH6-9
+TONE_FIR_ON             4 0x00102100    # 0: CH1-5, 1: CH6-10
 TONE_FIR_UPD            4 0x00102108    # write 0 -> 1
 # CH1-5: 0=Tone1, 1=Tone2, 2=Tone3, 3=Tone4
 # CH6-10: 4=Tone1, 5=Tone2, 6=Tone3, 7=Tone4
 TONE_FIR_CH_SEL         4 0x0010210C
 # 15..0: 0x4000 = 1.0
-TONE_FIR_COEFF_0        4 0x00102110    # +/-20
-TONE_FIR_COEFF_1        4 0x00102114    # +/-19
-TONE_FIR_COEFF_2        4 0x00102118    # +/-18
-TONE_FIR_COEFF_3        4 0x0010211C    # +/-17
-TONE_FIR_COEFF_4        4 0x00102120    # +/-16
-TONE_FIR_COEFF_5        4 0x00102124    # +/-15
-TONE_FIR_COEFF_6        4 0x00102128    # +/-14
-TONE_FIR_COEFF_7        4 0x0010212C    # +/-13
-TONE_FIR_COEFF_8        4 0x00102130    # +/-12
-TONE_FIR_COEFF_9        4 0x00102134    # +/-11
+TONE_FIR_COEFF_00       4 0x00102110    # +/-20
+TONE_FIR_COEFF_01       4 0x00102114    # +/-19
+TONE_FIR_COEFF_02       4 0x00102118    # +/-18
+TONE_FIR_COEFF_03       4 0x0010211C    # +/-17
+TONE_FIR_COEFF_04       4 0x00102120    # +/-16
+TONE_FIR_COEFF_05       4 0x00102124    # +/-15
+TONE_FIR_COEFF_06       4 0x00102128    # +/-14
+TONE_FIR_COEFF_07       4 0x0010212C    # +/-13
+TONE_FIR_COEFF_08       4 0x00102130    # +/-12
+TONE_FIR_COEFF_09       4 0x00102134    # +/-11
 TONE_FIR_COEFF_10       4 0x00102138    # +/-10
 TONE_FIR_COEFF_11       4 0x0010213C    # +/-9
 TONE_FIR_COEFF_12       4 0x00102140    # +/-8
