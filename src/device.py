@@ -12,6 +12,7 @@ NCH = 10
 NFIR = 17
 NBPM = 2
 NSPMASK = 4
+LENSP = 4096
 NSPAREA = 4
 NFIRCOD = 20
 NFIRTBT = 15
@@ -544,6 +545,47 @@ class Device:
         if isinstance(arg, Bitfield) and arg.name != "COD_FIR":
             return TypeError("Invalid Bitfield ({}).".format(arg.name))
         self.write(Register("COD_FIR_ON"), int(arg))
+
+    # SP Mode
+    def get_sp_mask(self, ch, idx):
+        if ch not in range(NBPM):
+            raise ValueError("Invalid channel. {}".format(ch))
+        if idx not in range(NSPMASK):
+            raise ValueError("Invalid mask index. {}".format(idx))
+        ret = (self.read(Register("SP_BPM{}_MASK{}".format(ch+1,idx+1)), LENSP//32))
+        mask = np.array([(i>>j)&1 for i in ret for j in range(32)], np.uint8)
+        return mask
+    def set_sp_mask(self, ch, idx, mask):
+        if ch not in range(NBPM):
+            raise ValueError("Invalid channel. {}".format(ch))
+        if idx not in range(NSPMASK):
+            raise ValueError("Invalid mask index. {}".format(idx))
+        if len(mask) > LENSP:
+            raise ValueError("Mask too long. {}".format(len(mask)))
+        arg = [0] * (LENSP//32)
+        for i,j in enumerate(mask):
+            arg[i//32] |= int(j!=0)<<(i%32)
+        self.write(Register("SP_BPM{}_MASK{}".format(ch+1,idx+1)), arg)
+    def get_rev_clk_src(self):
+        ret = self.read(Register("SP_REV_INIT_TRIG"))
+        return Bitfield("DIO", ret)
+    def set_rev_clk_src(self, arg):
+        if isinstance(arg, Bitfield) and arg.name != "DIO":
+            return TypeError("Invalid Bitfield ({}).".format(arg.name))
+        self.write(Register("SP_REV_INIT_TRIG"), int(arg))
+    def get_sp_wfm_sel(self):
+        return self.read(Register("SP_WAVE_MASK_SEL"))
+    def set_sp_wfm_sel(self, idx):
+        if idx not in range(NSPMASK):
+            raise ValueError("Invalid mask index. {}".format(idx))
+        self.write(Register("SP_WAVE_MASK_SEL"), idx)
+    def get_sp_debug(self):
+        period = self.read(Register("REV_PERIOD"))
+        dout = self.read(Register("REV_OUT"))
+        return period, dout
+    def set_sp_debug(self, period, dout):
+        self.write(Register("REV_PERIOD"), period)
+        self.write(Register("REV_OUT"), dout)
 
     # Cal. Tone
     def get_tone_nco(self, ch, fiq=508.58e6*5./28.):

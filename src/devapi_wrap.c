@@ -647,7 +647,7 @@ static PyObject* mmeadc01b_get_sp_data(PyObject* self, PyObject* args){
   const int ND = 3;
   const int index[N_BPM_CH] = {BPM_CH_1_SP_1, BPM_CH_2_SP_1};
   const int nmask = N_MMEADC01B_SP_MASK;
-  const int nelem = LEN_BPM_DAT_UNIT_SA / sizeof(int32_t) / nmask;
+  const int nelem = LEN_BPM_DAT_UNIT_SP / sizeof(int32_t) / nmask;
   const int npts = N_BPM_POINTS_SP / N_BPM_SP_BLOCKS;
   void* dbuf[N_DMA_BUF];
   npy_intp dims[/*ND*/] = {nmask, nelem, npts};
