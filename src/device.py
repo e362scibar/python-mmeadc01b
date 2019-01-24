@@ -25,6 +25,7 @@ META = ["ADC_WFM", "IQ_WFM", "SP_WFM", "CT_L", "CT_H",
 CODMODE = ["TBT", "FA", "SA"]
 
 DMA_REQ_WFM = 1
+DMA_REQ_TONE = [1<<4, 1<<5]
 DMA_REQ_TBT = [1<<8, 1<<16]
 DMA_REQ_FA = [1<<9, 1<<17]
 DMA_REQ_SA = [1<<10, 1<<18]
@@ -385,8 +386,15 @@ class Device:
     def get_tone_wfm(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
-        status, tone = devapi.get_waveform_tone(self.dmabuf)
-        return tone
+        meta = self.get_meta()
+        bit = ["CT_L", "CT_H"]
+        for i in range(2):
+            idx = meta[bit[i]]["idx_latest"]
+            self.start_dma_xfer(DMA_REQ_TONE[i], idx)
+        status, data = devapi.get_waveform_tone(self.dmabuf)
+        if status:
+            raise Error(status)
+        return data
     def get_sp_wfm(self):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")

@@ -528,7 +528,7 @@ static PyObject* mmeadc01b_get_waveform_tone(PyObject* self, PyObject* args){
   get_tuple_ptr(dbuf, data);
   wfm_tone = (PyArrayObject*)PyArray_SimpleNew(ND, dims, NPY_COMPLEX64);
   for(i=0; i<N_TONE_CH; i++){
-    const int* p1 = dbuf[N_ADC_CH+N_DDC_CH+i];
+    const int* p1 = dbuf[N_ADC_CH+N_DDC_CH+N_SP_CH+i];
     for(j=0; j<N_TONE_FREQ; j++){
       for(k=0; k<N_TONE_POINTS; k++){
         float* p2 = (float*)PyArray_GETPTR3(wfm_tone, (npy_intp)i, (npy_intp)j, (npy_intp)k);
