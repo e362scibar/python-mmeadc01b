@@ -195,7 +195,7 @@ static PyObject* mmeadc01b_read(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_read(fd, id_bar, ofs, num, rbuf);
-  return Py_BuildValue("iO", status, set_tuple(num, rbuf));
+  return Py_BuildValue("iN", status, set_tuple(num, rbuf));
 }
 
 static PyObject* mmeadc01b_write(PyObject* self, PyObject* args){
@@ -232,7 +232,7 @@ static PyObject* mmeadc01b_read_float(PyObject* self, PyObject* args){
     buf.i = rbuf[i];
     dbuf[i] = (double)buf.f;
   }
-  return Py_BuildValue("iO", status, set_tuple_double(num, dbuf));
+  return Py_BuildValue("iN", status, set_tuple_double(num, dbuf));
 }
 
 static PyObject* mmeadc01b_write_float(PyObject* self, PyObject* args){
@@ -269,7 +269,7 @@ static PyObject* mmeadc01b_adc_read(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_adc_read(fd, id_adc, addr, num, rbuf);
-  return Py_BuildValue("iO", status, set_tuple(num, rbuf));
+  return Py_BuildValue("iN", status, set_tuple(num, rbuf));
 }
 
 static PyObject* mmeadc01b_adc_write(PyObject* self, PyObject* args){
@@ -298,7 +298,7 @@ static PyObject* mmeadc01b_dac_read(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_dac_read(fd, addr, num, rbuf);
-  return Py_BuildValue("iO", status, set_tuple(num, rbuf));
+  return Py_BuildValue("iN", status, set_tuple(num, rbuf));
 }
 
 static PyObject* mmeadc01b_dac_write(PyObject* self, PyObject* args){
@@ -351,7 +351,7 @@ static PyObject* mmeadc01b_user_i2c_read(PyObject* self, PyObject* args){
   fmt.rbuf = rbuf;
   fmt.rlen = num;
   status = dev_mmeadc01b_user_i2c_read(fd, &fmt);
-  return Py_BuildValue("iO", status, set_tuple_char(num, rbuf));
+  return Py_BuildValue("iN", status, set_tuple_char(num, rbuf));
 }
 
 static PyObject* mmeadc01b_user_i2c_write(PyObject* self, PyObject* args){
@@ -386,7 +386,7 @@ static PyObject* mmeadc01b_mmap_dma_buf(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_mmap_dma_buf(fd, dbuf);
-  return Py_BuildValue("iO", status, set_tuple_ptr(dbuf));
+  return Py_BuildValue("iN", status, set_tuple_ptr(dbuf));
 }
 
 static PyObject* mmeadc01b_munmap_dma_buf(PyObject* self, PyObject* args){
@@ -428,7 +428,7 @@ static PyObject* mmeadc01b_get_meta(PyObject* self, PyObject* args){
     return NULL;
   }
   status = dev_mmeadc01b_get_meta(fd, xm);
-  return Py_BuildValue("iO", status, set_tuple_meta(N_MMEADC01B_META_IDS, xm));
+  return Py_BuildValue("iN", status, set_tuple_meta(N_MMEADC01B_META_IDS, xm));
 }
 
 static PyObject* mmeadc01b_clear_dma_buf_status(PyObject* self, PyObject* args){
@@ -510,7 +510,7 @@ static PyObject* mmeadc01b_get_waveform(PyObject* self, PyObject* args){
       p2[1] = (float)((short)((p1[j]>>16)&0xFFFF));
     }
   }
-  return Py_BuildValue("iOO", status, wfm_adc, wfm_iq);
+  return Py_BuildValue("iNN", status, wfm_adc, wfm_iq);
 }
 
 static PyObject* mmeadc01b_get_waveform_tone(PyObject* self, PyObject* args){
@@ -537,7 +537,7 @@ static PyObject* mmeadc01b_get_waveform_tone(PyObject* self, PyObject* args){
       }
     }
   }
-  return Py_BuildValue("iO", status, wfm_tone);
+  return Py_BuildValue("iN", status, wfm_tone);
 }
 
 static PyObject* mmeadc01b_get_waveform_sp(PyObject* self, PyObject* args){
@@ -564,7 +564,7 @@ static PyObject* mmeadc01b_get_waveform_sp(PyObject* self, PyObject* args){
       }
     }
   }
-  return Py_BuildValue("iO", status, wfm_sp);
+  return Py_BuildValue("iN", status, wfm_sp);
 }
 
 /* BPM Data Stream */
@@ -601,7 +601,7 @@ static PyObject* mmeadc01b_get_tbt_data(PyObject* self, PyObject* args){
   }
   get_tuple_ptr(dbuf, data);
   data_tbt = get_bpm_data((const int32_t*)dbuf[index[ch]], nelem, npts);
-  return Py_BuildValue("iO", status, data_tbt);
+  return Py_BuildValue("iN", status, data_tbt);
 }
 
 static PyObject* mmeadc01b_get_fa_data(PyObject* self, PyObject* args){
@@ -620,7 +620,7 @@ static PyObject* mmeadc01b_get_fa_data(PyObject* self, PyObject* args){
   }
   get_tuple_ptr(dbuf, data);
   data_fa = get_bpm_data((const int32_t*)dbuf[index[ch]], nelem, npts);
-  return Py_BuildValue("iO", status, data_fa);
+  return Py_BuildValue("iN", status, data_fa);
 }
 
 static PyObject* mmeadc01b_get_sa_data(PyObject* self, PyObject* args){
@@ -639,7 +639,7 @@ static PyObject* mmeadc01b_get_sa_data(PyObject* self, PyObject* args){
   }
   get_tuple_ptr(dbuf, data);
   data_sa = get_bpm_data((const int32_t*)dbuf[index[ch]], nelem, npts);
-  return Py_BuildValue("iO", status, data_sa);
+  return Py_BuildValue("iN", status, data_sa);
 }
 
 static PyObject* mmeadc01b_get_sp_data(PyObject* self, PyObject* args){
@@ -677,7 +677,7 @@ static PyObject* mmeadc01b_get_sp_data(PyObject* self, PyObject* args){
       }
     }
   }
-  return Py_BuildValue("iO", status, data_sp);
+  return Py_BuildValue("iN", status, data_sp);
 }
 
 /* Module definition */
