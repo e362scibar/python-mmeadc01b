@@ -13,11 +13,10 @@ setup(name="mmeadc01b",
                 author="Hirokazu Maesaka",
                 author_email="maesaka@spring8.or.jp",
                 url="http://xfel.riken.jp/",
-                #packages=["mmeadc01b"],
-                packages=find_packages(),
-                #package_dir={"mmeadc01b":"src"},
-                #package_data={"mmeadc01b": ["regdata.txt","errordata.txt",
-                #        "bitinfo.json", "regadc.json"]},
+                packages=["mmeadc01b"],
+                #packages=find_packages("src"),
+                package_dir={"mmeadc01b":"src"},
+                package_data={"": ["*.txt", "*.json"]},
                 ext_modules = [ext_devapi]
                 )
 
