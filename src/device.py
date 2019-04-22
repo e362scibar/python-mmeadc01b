@@ -373,9 +373,23 @@ class Device:
     # Rotator functions
     def get_rotator(self, ch):
         """ CH 0: DAC, CH 1-10: IQ """
-        status, gain, phase = devapi.get_rot_coeff(self.fd, ch)
-        if status:
-            raise Error(status)
+        #status, gain, phase = devapi.get_rot_coeff(self.fd, ch)
+        if ch == 0: # DAC
+            gain = self.read(Register("DAC_OUT_ROT_GAIN")) & 0xffff
+            gain /= 0x1000
+            phase = self.read(Register("DAC_OUT_ROT_THETA")) & 0xffff
+            phase *= np.pi / 0x10000
+        else: # IQ
+            if (ch-1) not in range(NCH):
+                raise ValueError("Invalid channel. {}".format(ch))
+            elem = {}
+            for k in ("A", "B", "C"):
+                elem[k] = self.read(Register("IQ{:02d}_ROT_{}".format(ch, k))) & 0x3ffff
+                if elem[k] >= 0x20000:
+                    elem[k] -= 0x40000
+                elem[k] /= 0x4000
+            gain = np.sqrt(elem["A"]**2 - elem["B"]*elem["C"])
+            phase = np.arctan2((elem["C"]-elem["B"])/2., elem["A"])
         return gain * np.exp(1.j * phase)
     def set_rotator(self, ch, z=1.0):
         """ CH 0: DAC, CH 1-10: IQ """
