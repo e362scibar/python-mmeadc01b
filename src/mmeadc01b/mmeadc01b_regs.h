@@ -1,8 +1,8 @@
 /**
  * @file     mmeadc01b_regs.h
- * @brief    MME-ADC01-B FPGA register map (2018-11-20 ver.)
+ * @brief    MME-ADC01-B FPGA register map (2010-03-12 ver.)
  *
- * @note     updated for LLRF.
+ * @note     updated for BPM.
  *
  * @note     PCI BARs:
  *            BAR0: 0x7100 0000 ,,,
@@ -26,7 +26,7 @@
 #define     N_SP_POINTS                           ( 4 << 10)             /* # of SP           points/SRAM   4k[pt]  */
 #define   N_TONE_POINTS                           (     256)             /* # of CAL Tone     points/SRAM  256[pt]  */
 #define    N_BPM_POINTS_TBT                       (64 << 10)             /* # of BPM COD TbT  points/SRAM  64k[pt]  */
-#define    N_BPM_POINTS_FA                        (64 << 10)             /* # of BPM COD FA   points/SRAM  64k[pt]  */
+#define    N_BPM_POINTS_FA                        (32 << 10)             /* # of BPM COD FA   points/SRAM  32k[pt]  */
 #define    N_BPM_POINTS_SA                        (     256)             /* # of BPM COD SA   points/SRAM  256[pt]  */
 #define    N_BPM_POINTS_SP                        (64 << 10)             /* # of BPM SP Proc  points/SRAM  64k[pt]  */
 
@@ -123,6 +123,9 @@
 #define  BPM_CH_2_SP_3                                   56 /* BPM  2 > SP Process:   3  of 4 */
 #define  BPM_CH_2_SP_4                                   57 /* BPM  2 > SP Process:    4 of 4 */
 #define  N_MMEADC01B_CH                                  58  /* total # of channels on MME-ADC01-B */
+
+#define  IS_MMEADC01B_SP_CH(idx_ch)      ( ((BPM_CH_1_SP_1 <= (idx_ch)) && ((idx_ch) <= BPM_CH_1_SP_4)) || \
+                                           ((BPM_CH_2_SP_1 <= (idx_ch)) && ((idx_ch) <= BPM_CH_2_SP_4))    )
 
 #define  N_ADC_CH                                        10      /* ADC: 5 devices x 2 ch           */
 #define  N_DDC_CH                                        16      /* DDC: ADC 10ch + 6 extra ch      */
@@ -264,6 +267,9 @@
  *             bit  0   : ADC ch
  */
 
+#define  MMEADC01B_INT_WFM                       0x00000007              /* WFMs(SP, I/Q, ADC) */
+#define  MMEADC01B_INT_BPM_TONE                  0x007F7F30              /* TONE and BPMs      */
+
 /*
  * CMPLT_SRC:
  * CMPLT_CLR:
@@ -326,11 +332,19 @@
 #define  INT_SRC_BPM2_SP_PROC                  (INT_SRC_BPM2_SP_PROC1 | INT_SRC_BPM2_SP_PROC2 | INT_SRC_BPM2_SP_PROC3 | INT_SRC_BPM2_SP_PROC4)
 #define  INT_SRC_BPM1_SP_PROC                  (INT_SRC_BPM1_SP_PROC1 | INT_SRC_BPM1_SP_PROC2 | INT_SRC_BPM1_SP_PROC3 | INT_SRC_BPM1_SP_PROC4)
 
-#define  INT_SRC_TONE                          (INT_SRC_TONE1 | INT_SRC_TONE2)                                                                         /* CAL Tones                             */
+#define  INT_SRC_BPM_SP                        (INT_SRC_BPM2_SP_PROC  | INT_SRC_BPM1_SP_PROC )
 
-#define  INT_SRC_ACQ                           (INT_SRC_ADC   | INT_SRC_DDC  )                                                                         /*            ADC + I/Q                  */
-#define  INT_SRC_WFM                           (INT_SRC_ADC   | INT_SRC_DDC   | INT_SRC_SP)                                                            /* waveforms (ADC + I/Q + SP)            */
-#define  INT_SRC_MISC                          (INT_SRC_ADC   | INT_SRC_DDC   | INT_SRC_SP | INT_SRC_TONE | INT_SRC_BPM1_COD_SA | INT_SRC_BPM2_COD_SA) /* waveforms + CAL Tone + BPM[12] COD SA */
+#define  INT_SRC_BPM_SA                        (INT_SRC_BPM2_COD_SA   | INT_SRC_BPM1_COD_SA  )
+#define  INT_SRC_BPM_FA                        (INT_SRC_BPM2_COD_FA   | INT_SRC_BPM1_COD_FA  )
+#define  INT_SRC_BPM_TBT                       (INT_SRC_BPM2_COD_TBT  | INT_SRC_BPM1_COD_TBT )
+
+#define  INT_SRC_TONE                          (INT_SRC_TONE1 | INT_SRC_TONE2)                                              /* CAL Tones                             */
+
+#define  INT_SRC_ACQ                           (INT_SRC_ADC   | INT_SRC_DDC  )                                              /*            ADC + I/Q                  */
+#define  INT_SRC_WFM                           (INT_SRC_ADC   | INT_SRC_DDC   | INT_SRC_SP)                                 /* waveforms (ADC + I/Q + SP)            */
+#define  INT_SRC_MISC                          (INT_SRC_ADC   | INT_SRC_DDC   | INT_SRC_SP | INT_SRC_TONE | INT_SRC_BPM_SA) /* waveforms + CAL Tone + BPM[12] COD SA */
+
+#define  INT_SRC_DAT_ALL                       (INT_SRC_ADC   | INT_SRC_DDC   | INT_SRC_SP | INT_SRC_TONE | INT_SRC_BPM_SA | INT_SRC_BPM_FA | INT_SRC_BPM_TBT | INT_SRC_BPM_SP) /* ALL data */
 
 /* register map */
 /* ************************************************************: BAR 0 */
@@ -702,13 +716,15 @@
  * INTL_SRC_1:
  *    3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
  *    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
- *   +-------+-----------------------+---------------+-------+-------+
- *   | Front |         RTM           | (_Reserved_)  |Tx20_17|Rx20_17|
- *   |  DI   |          DI           |               | DI    | DI    |
- *   +-------+-----------------------+---------------+-------+-------+
+ *   +-------+-----------------------+-----------+-+-+-------+-------+
+ *   | Front |         RTM           | (_RSVD_)  |C|C|Tx20_17|Rx20_17|
+ *   |  DI   |          DI           |           |5|4| DI    | DI    |
+ *   +-------+-----------------------+-----------+-+-+-------+-------+
  *             bit 31-28: Front of AMC       (J2 : DI           ) ... FRONT_DI3_P/_N ... FRONT_DI0_P/_N
  *             bit 27-16: RTM                (J30: Zone 3       ) ... RTM_D11P/N     ... RTM_D0P/N
- *             bit 15-8 : (_Reserved_)
+ *             bit 15-10: (_Reserved_)
+ *             bit  9   : RTM ZONE3 CLK5
+ *             bit  8   : RTM ZONE3 CLK4
  *             bit  7-4 : Port 20-17 TX      (P1 : AMC card edge) ... MB_TX20P/N     ...  MB_TX17P/N
  *             bit  3-0 : Port 20-17 RX      (P1 : AMC card edge) ... MB_RX20P/N     ...  MB_RX17P/N
  *
@@ -975,9 +991,14 @@
 
 #define  MMEADC01B_REG_SP_MASK_SEL               0x00100124              /* SP_MASK_SEL          */
 
-/*  BAR 4: SP   > waveform > trigger mode */
-#define  MMEADC01B_REG_SP_TRIG_FORCED            0x00000130              /* SP_TRIG_FORCED       */
-#define  MMEADC01B_REG_SP_DI_TRIG_EN             0x00000134              /* SP_DI_TRIG_EN        */
+/*  BAR 4: BPM SP proc > trigger */
+#define  MMEADC01B_REG_BPM1_SP_TRIG_FORCED       0x00100128              /* BPM1_SP_TRIG_FORCED  */
+#define  MMEADC01B_REG_BPM1_SP_DI_TRIG_EN        0x0010012C              /* BPM1_SP_DI_TRIG_EN   */
+#define  MMEADC01B_REG_BPM1_SP_DLY_TRIG          0x00100130              /* BPM1_SP_DLY_TRIG     */
+
+#define  MMEADC01B_REG_BPM2_SP_TRIG_FORCED       0x00100134              /* BPM2_SP_TRIG_FORCED  */
+#define  MMEADC01B_REG_BPM2_SP_DI_TRIG_EN        0x00100138              /* BPM2_SP_DI_TRIG_EN   */
+#define  MMEADC01B_REG_BPM2_SP_DLY_TRIG          0x0010013C              /* BPM2_SP_DLY_TRIG     */
 
 /*  BAR 4: BPM  > data xfer */
 #define  MMEADC01B_REG_BPM_TX_CTRL               0x00100140              /* BPM_TX_CTRL          */
@@ -993,6 +1014,15 @@
 
 #define  MMEADC01B_REG_BPM2_SP_BAR               0x0010016C              /* BPM2_SP_BAR          */
 
+/*  BAR 4: BPM SA      > trigger */
+#define  MMEADC01B_REG_BPM1_SA_TRIG_FORCED       0x00100170              /* BPM1_SA_TRIG_FORCED  */
+#define  MMEADC01B_REG_BPM1_SA_DI_TRIG_EN        0x00100174              /* BPM1_SA_DI_TRIG_EN   */
+#define  MMEADC01B_REG_BPM1_SA_DLY_TRIG          0x00100178              /* BPM1_SA_DLY_TRIG     */
+
+#define  MMEADC01B_REG_BPM2_SA_TRIG_FORCED       0x0010017C              /* BPM2_SA_TRIG_FORCED  */
+#define  MMEADC01B_REG_BPM2_SA_DI_TRIG_EN        0x00100180              /* BPM2_SA_DI_TRIG_EN   */
+#define  MMEADC01B_REG_BPM2_SA_DLY_TRIG          0x00100184              /* BPM2_SA_DLY_TRIG     */
+
 #define  MMEADC01B_REG_BPM1_COD_CAP_TBT          0x00100190              /* BPM1_COD_CAP_TBT     */
 #define  MMEADC01B_REG_BPM1_COD_CAP_FA           0x00100194              /* BPM1_COD_CAP_FA      */
 #define  MMEADC01B_REG_BPM1_COD_CAP_SA           0x00100198              /* BPM1_COD_CAP_SA      */
@@ -1003,9 +1033,66 @@
 #define  MMEADC01B_REG_BPM2_COD_CAP_SA           0x001001A8              /* BPM2_COD_CAP_SA      */
 #define  MMEADC01B_REG_BPM2_SP_CAP               0x001001AC              /* BPM2_SP_CAP          */
 
+/*  BAR 4: BPM TbT     > trigger */
+#define  MMEADC01B_REG_BPM1_TBT_TRIG_FORCED      0x001001B0              /* BPM1_TBT_TRIG_FORCED */
+#define  MMEADC01B_REG_BPM1_TBT_DI_TRIG_EN       0x001001B4              /* BPM1_TBT_DI_TRIG_EN  */
+#define  MMEADC01B_REG_BPM1_TBT_DLY_TRIG         0x001001B8              /* BPM1_TBT_DLY_TRIG    */
+
+#define  MMEADC01B_REG_BPM2_TBT_TRIG_FORCED      0x001001BC              /* BPM2_TBT_TRIG_FORCED */
+#define  MMEADC01B_REG_BPM2_TBT_DI_TRIG_EN       0x001001C0              /* BPM2_TBT_DI_TRIG_EN  */
+#define  MMEADC01B_REG_BPM2_TBT_DLY_TRIG         0x001001C4              /* BPM2_TBT_DLY_TRIG    */
+
+/*  BAR 4: BPM FA      > trigger */
+#define  MMEADC01B_REG_BPM1_FA_TRIG_FORCED       0x001001C8              /* BPM1_FA_TRIG_FORCED  */
+#define  MMEADC01B_REG_BPM1_FA_DI_TRIG_EN        0x001001CC              /* BPM1_FA_DI_TRIG_EN   */
+#define  MMEADC01B_REG_BPM1_FA_DLY_TRIG          0x001001D0              /* BPM1_FA_DLY_TRIG     */
+
+#define  MMEADC01B_REG_BPM2_FA_TRIG_FORCED       0x001001D4              /* BPM2_FA_TRIG_FORCED  */
+#define  MMEADC01B_REG_BPM2_FA_DI_TRIG_EN        0x001001D8              /* BPM2_FA_DI_TRIG_EN   */
+#define  MMEADC01B_REG_BPM2_FA_DLY_TRIG          0x001001DC              /* BPM2_FA_DLY_TRIG     */
+
 /*  BAR 4: completion status for generating data  */
 #define  MMEADC01B_REG_CMPLT_SRC                 0x001001E0              /* CMPLT_SRC            */
 #define  MMEADC01B_REG_CMPLT_CLR                 0x001001E4              /* CMPLT_CLR            */
+#define  MMEADC01B_REG_CMPLT_MSK                 0x001001E8              /* CMPLT_MSK            */
+
+/*  BAR 4: BPM FA     > offset address for double buffers */
+/*
+ * 31 30          16 15             0
+ * +-+-+------------+----------------+
+ * |W|R|   current offset address    |
+ * +-+-+------------+----------------+
+ *
+ *   bit 31  : wrapped            ... 0:no wrapped, 1:wrapped
+ *   bit 30  : ring buffer A|B    ... 0:buffer A  , 1:buffer B    ... this bit indicates where data stored.
+ *   bit 29-0: current ofs addr   ... offset address of latast data
+ */
+#define  MMEADC01B_REG_BPM1_FA_ADDR              0x001001F0              /* BPM1_FA_ADDR         */
+#define  MMEADC01B_REG_BPM2_FA_ADDR              0x001001F4              /* BPM2_FA_ADDR         */
+
+#define  MMEADC01B_IDX_WRAPPED                        BIT31              /* wrap around or not   */
+#define  MMEADC01B_ID_RING                            BIT30              /*  ring buffer ID      */
+#define  MMEADC01B_ID_RING_A                              0              /*   buffer: A          */
+#define  MMEADC01B_ID_RING_B                          BIT30              /*   buffer: B          */
+#define  MMEADC01B_IDX_OFS                  ~(BIT31 | BIT30)             /* offset address mask  */
+
+/*
+ * 31              17          9          0
+ * +---------------+-+-+------+-+-+--------+
+ * |               |2|        |1|          |
+ * +---------------+-+-+------+-+-+--------+
+ *
+ *   bit 31-18: (_Reserved_)
+ *   bit 17   :   read fault for BPM1 FA (next data has come before DMA xfer)
+ *   bit 17-10: (_Reserved_)
+ *   bit  9   :   read fault for BPM2 FA (next data has come before DMA xfer)
+ *   bit  8-10: (_Reserved_)
+ */
+#define  MMEADC01B_REG_BPM_FA_RDFAULT            0x001001F8              /* BPM_FA_RDFAULT       */
+#define  MMEADC01B_BPM2_FA_RDFAULT                    BIT17              /*  rdfault BPM2 FA     */
+#define  MMEADC01B_BPM1_FA_RDFAULT                     BIT9              /*  rdfault BPM1 FA     */
+
+#define  MMEADC01B_REG_BPM_FA_RDFAULT_CLR        0x001001FC              /* BPM_FA_RDFAULT_CLR   */
 
 /*  BAR 4: BPM  > amplitude offsets */
 #define  MMEADC01B_REG_BPM_OFS_COD_TBT_1         0x00101000              /* BPM_OFS_COD_TBT_1    */
@@ -1276,6 +1363,15 @@
 #define  MMEADC01B_REG_TONE_CURR_CH_L            0x001021E0              /* TONE_CURR_CH_L       */
 #define  MMEADC01B_REG_TONE_CURR_CH_H            0x001021E4              /* TONE_CURR_CH_H       */
 
+/*  BAR 4: CAL. TONE   > trigger */
+#define  MMEADC01B_REG_TONE1_TRIG_FORCED         0x001021E8              /* TONE1_TRIG_FORCE     */ /* ch 1-5  */
+#define  MMEADC01B_REG_TONE1_DI_TRIG_EN          0x001021EC              /* TONE1_DI_TRIG_EN     */
+#define  MMEADC01B_REG_TONE1_DLY_TRIG            0x001021F0              /* TONE1_DLY_TRIG       */
+
+#define  MMEADC01B_REG_TONE2_TRIG_FORCED         0x001021F4              /* TONE2_TRIG_FORCE     */ /* ch 6-10 */
+#define  MMEADC01B_REG_TONE2_DI_TRIG_EN          0x001021F8              /* TONE2_DI_TRIG_EN     */
+#define  MMEADC01B_REG_TONE2_DLY_TRIG            0x001021FC              /* TONE2_DLY_TRIG       */
+
 /*  BAR 4: BPM[12] COD SA waveforms  */
 #define  MMEADC01B_REG_BPM1_COD_SA               0x00140000              /* BPM 1  COD SA        */
 #define  MMEADC01B_REG_BPM2_COD_SA               0x00148000              /* BPM  2 COD SA        */
@@ -1413,7 +1509,8 @@
 #define            OFS_TONE4_I                         0x18              /*    OFS_TONE4_I       */
 #define            OFS_TONE4_Q                         0x1C              /*    OFS_TONE4_Q       */
 
-#define  MMEADC01B_REG_SRAM_TONE(ch)    (MMEADC01B_REG_TONE_1 + (LEN_TONE_DAT  * (ch)))
+#define  MMEADC01B_REG_SRAM_TONE1(ch)   (MMEADC01B_REG_TONE_1 + (LEN_TONE_DAT  * (ch)))
+#define  MMEADC01B_REG_SRAM_TONE2(ch)   (MMEADC01B_REG_TONE_6 + (LEN_TONE_DAT  * (ch)))
 
 /*  BAR 4: SP  > waveform */
 #define  MMEADC01B_REG_SP_1                      0x001E0000              /* SP_1                 */
