@@ -1,5 +1,4 @@
-from distutils.core import setup, Extension
-import os
+from setuptools import setup, find_packages, Extension
 import numpy as np
 
 ext_devapi = Extension("mmeadc01b.devapi",
@@ -14,9 +13,11 @@ setup(name="mmeadc01b",
                 author="Hirokazu Maesaka",
                 author_email="maesaka@spring8.or.jp",
                 url="http://xfel.riken.jp/",
-                packages=["mmeadc01b"],
-                package_dir={"mmeadc01b":"src"},
-                package_data={"mmeadc01b": ["regdata.txt","errordata.txt",
-                        "bitinfo.json", "regadc.json"]},
-                ext_modules = [ext_devapi])
+                #packages=["mmeadc01b"],
+                packages=find_packages(),
+                #package_dir={"mmeadc01b":"src"},
+                #package_data={"mmeadc01b": ["regdata.txt","errordata.txt",
+                #        "bitinfo.json", "regadc.json"]},
+                ext_modules = [ext_devapi]
+                )
 
