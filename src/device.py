@@ -402,10 +402,8 @@ class Device:
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
         meta = self.get_meta()
-        bit = ["CT_L", "CT_H"]
-        for i in range(2):
-            idx = meta[bit[i]]["idx_latest"]
-            self.start_dma_xfer(DMA_REQ_TONE[i], idx)
+        idx = meta["CT_L"]["idx_latest"]
+        self.start_dma_xfer(DMA_REQ_TONE[0], idx)
         status, data = devapi.get_waveform_tone(self.dmabuf)
         if status:
             raise Error(status)
@@ -464,9 +462,9 @@ class Device:
             raise RuntimeError("DMA buffer not mmaped.")
         ret = []
         meta = self.get_meta()
+        idx = meta["BPM1SA"]["idx_latest"]
+        self.start_dma_xfer(DMA_REQ_SA[0], idx)
         for i in range(NBPM):
-            idx = meta["BPM{}SA".format(i+1)]["idx_latest"]
-            self.start_dma_xfer(DMA_REQ_SA[i], idx)
             status, data = devapi.get_sa_data(self.dmabuf, i)
             tmp = {}
             tmp['x'] = data[0,:] / 2.**20
