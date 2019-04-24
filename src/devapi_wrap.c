@@ -608,7 +608,7 @@ static PyObject* mmeadc01b_get_fa_data(PyObject* self, PyObject* args){
   int status=0, ch;
   const int index[N_BPM_CH] = {BPM_CH_1_FA, BPM_CH_2_FA};
   const int nelem = LEN_BPM_DAT_UNIT_FA / sizeof(int32_t);
-  const int npts = N_BPM_POINTS_FA;
+  const int npts = N_BPM_POINTS_FA * 2;  /* double buffer */
   void* dbuf[N_DMA_BUF];
   PyObject* data;
   PyArrayObject* data_fa;
