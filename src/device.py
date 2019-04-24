@@ -403,6 +403,7 @@ class Device:
             raise RuntimeError("DMA buffer not mmaped.")
         meta = self.get_meta()
         idx = meta["CT_L"]["idx_latest"]
+        #idx = meta["ADC_WFM"]["idx_latest"]
         self.start_dma_xfer(DMA_REQ_TONE[0], idx)
         status, data = devapi.get_waveform_tone(self.dmabuf)
         if status:
