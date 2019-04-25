@@ -266,11 +266,15 @@ class Device:
         self.write(Register("WAVE_SOFTTRG"), 0)
     def wfm_terminate(self):
         self.munmap_dma_buf()
-    def wfm_get(self):
+    def wfm_get(self, intl=False):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmapped.")
         meta = self.get_meta()
-        self.start_dma_xfer(DMA_REQ_WFM, meta["ADC_WFM"]["idx_latest"])
+        if intl:
+            idx = meta["ADC_WFM"]["idx_intl"]
+        else:
+            idx = meta["ADC_WFM"]["idx_latest"]
+        self.start_dma_xfer(DMA_REQ_WFM, idx)
         status, adc, iq = devapi.get_waveform(self.dmabuf)
         status, sp = devapi.get_waveform_sp(self.dmabuf)
         return adc, iq, sp
@@ -416,13 +420,16 @@ class Device:
         return sp
 
     # BPM data
-    def get_tbt_data(self):
+    def get_tbt_data(self, intl=False):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
         ret = []
         meta = self.get_meta()
         for i in range(NBPM):
-            idx = meta["BPM{}TBT".format(i+1)]["idx_latest"]
+            if intl:
+                idx = meta["BPM{}TBT".format(i+1)]["idx_intl"]
+            else:
+                idx = meta["BPM{}TBT".format(i+1)]["idx_latest"]
             self.start_dma_xfer(DMA_REQ_TBT[i], idx)
             status, data = devapi.get_tbt_data(self.dmabuf, i)
             tmp = {}
@@ -436,13 +443,16 @@ class Device:
             #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
         return ret
-    def get_fa_data(self):
+    def get_fa_data(self, intl=False):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
         ret = []
         meta = self.get_meta()
         for i in range(NBPM):
-            idx = meta["BPM{}FA".format(i+1)]["idx_latest"]
+            if intl:
+                idx = meta["BPM{}FA".format(i+1)]["idx_intl"]
+            else:
+                idx = meta["BPM{}FA".format(i+1)]["idx_latest"]
             self.start_dma_xfer(DMA_REQ_FA[i], idx)
             status, data = devapi.get_fa_data(self.dmabuf, i)
             tmp = {}
@@ -461,12 +471,15 @@ class Device:
             #ret.append([df.iloc[:l].copy(), df.iloc[l:].copy().reset_index(drop=True)])
             ret.append(df)
         return ret
-    def get_sa_data(self):
+    def get_sa_data(self, intl=False):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
         ret = []
         meta = self.get_meta()
-        idx = meta["BPM1SA"]["idx_latest"]
+        if intl:
+            idx = meta["BPM1SA"]["idx_intl"]
+        else:
+            idx = meta["BPM1SA"]["idx_latest"]
         self.start_dma_xfer(DMA_REQ_SA[0], idx)
         for i in range(NBPM):
             status, data = devapi.get_sa_data(self.dmabuf, i)
@@ -484,13 +497,16 @@ class Device:
             #    tmp['rsv{}'.format(j+1)] = data[j,:]
             ret.append(pd.DataFrame(tmp))
         return ret
-    def get_sp_data(self):
+    def get_sp_data(self, intl=False):
         if self.dmabuf is None:
             raise RuntimeError("DMA buffer not mmaped.")
         sp = []
         meta = self.get_meta()
         for i in range(NBPM):
-            idx = meta["BPM{}SP".format(i+1)]["idx_latest"]
+            if intl:
+                idx = meta["BPM{}SP".format(i+1)]["idx_intl"]
+            else:
+                idx = meta["BPM{}SP".format(i+1)]["idx_latest"]
             area = []
             for j in range(NSPAREA):
                 self.start_dma_xfer(DMA_REQ_SP[i][j], idx)
