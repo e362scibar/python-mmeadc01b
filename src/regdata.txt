@@ -328,7 +328,7 @@ IQ10_ROT_C              4 0x000000C4   # ADC_ROT_COEFF_C( 9 )
 
 # Interlock trigger
 INTL_SOFTTRG            4 0x00001000   # write 0->1
-INTL_EXTTRIG_ON         4 0x00001004   # Same as Ext I/O
+INTL_EXTTRG_ON          4 0x00001004   # Same as Ext I/O
 INTL_SELFTRG_ON         4 0x00001008
 # 9..0: ADC10-1, 19..10: IQ10-1, 25..24: BPM2-1
 

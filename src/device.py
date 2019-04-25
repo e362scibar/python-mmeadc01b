@@ -457,8 +457,9 @@ class Device:
             #for j in range(12,16):
             #    tmp['rsv{}'.format(j+1)] = data[j,:]
             df = pd.DataFrame(tmp)
-            l = len(df) >> 1
-            ret.append([df.iloc[:l].copy(), df.iloc[l:].copy().reset_index(drop=True)])
+            #l = len(df) >> 1
+            #ret.append([df.iloc[:l].copy(), df.iloc[l:].copy().reset_index(drop=True)])
+            ret.append(df)
         return ret
     def get_sa_data(self):
         if self.dmabuf is None:
