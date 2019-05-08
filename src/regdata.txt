@@ -727,7 +727,7 @@ BPM_OFS_SP_MASK4_10     4 0x0010114C
 # COD FA select three electrodes
 # 0: X1,Y1, 1: X2,Y2, 2: X3,Y3, 3: X4,Y4
 # 1..0: BPM1, 5..4: BPM2
-BPM3_COD_FA_3_SEL       4 0x00100160
+BPM3_COD_FA_3_SEL       4 0x00101160
 
 # Interlock for COD FA
 # 0: BPM1 4-electrode
